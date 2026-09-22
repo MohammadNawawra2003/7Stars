@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Record rules (spec §11).
+
+     Most of the PRD §17 matrix at the RECORD layer already comes free: a user holding
+     sales_team.group_sale_salesman without ...group_sale_salesman_all_leads is confined to
+     their own documents by the standard rule sale.sale_order_personal_rule. That is why the
+     booking clerk needs no rule of her own, and why T23's first run produced AccessError for
+     the wrong reason until the clerk was isolated (spec §3.4).
+
+     Record rules cannot restrict a single FIELD — «قواعد السجلات تعمل على مستوى السجل ولا
+     تستطيع تقييد حقل بعينه». Field-level restrictions live in the Python models. -->
+
+<!-- The accountant records money against bookings she did not create, so she needs to SEE
+     every booking. Rules within one group are OR-ed, so this widens her read access without
+     granting her any write on the booking itself; her write rights are on
+     seven.stars.payment, through ir.model.access.csv. -->
+<record id="rule_ss_accountant_reads_every_booking" model="ir.rule">
+    <field name="name">Seven Stars: the accountant sees every booking</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="domain_force">[('is_rental_order', '=', True)]</field>
+    <field name="groups" eval="[(4, ref('seven_stars_rental.group_ss_accountant'))]"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_write" eval="False"/>
+    <field name="perm_create" eval="False"/>
+    <field name="perm_unlink" eval="False"/>
+</record>
+
+<!-- A payment belongs to whoever may see its booking. ir.rule permissions all default to
+     True (base/models/ir_rule.py:27-30), so they are stated explicitly here. -->
+<record id="rule_ss_payment_follows_its_booking" model="ir.rule">
+    <field name="name">Seven Stars: a payment follows its booking</field>
+    <field name="model_id" ref="model_seven_stars_payment"/>
+    <field name="domain_force">[('order_id', '!=', False)]</field>
+    <field name="groups" eval="[
+        (4, ref('seven_stars_rental.group_ss_clerk')),
+        (4, ref('seven_stars_rental.group_ss_accountant')),
+    ]"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_write" eval="True"/>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_unlink" eval="True"/>
+</record>
+
+</odoo>

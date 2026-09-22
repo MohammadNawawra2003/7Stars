@@ -9,6 +9,7 @@
     'data': [
         'security/res_groups.xml',
         'security/ir.model.access.csv',
+        'security/ir_rules.xml',
         'data/ss_base_data.xml',
         'data/ss_pricelist_data.xml',
         'views/sale_order_views.xml',

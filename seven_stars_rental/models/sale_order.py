@@ -306,6 +306,10 @@ class SaleOrder(models.Model):
         ordered quantity (spec §3.2, runtime T5) — so a closed booking that never had its
         quantities set would read as late for ever.
         """
+        if not self._ss_is_management():
+            raise ValidationError(self.env._(
+                "إغلاق الحجز من صلاحية الإدارة فقط (القسم 17).\n\n"
+                "Closing a booking is reserved to management (PRD §17, spec §11)."))
         for order in self:
             order._ss_check_balance_before_close()
             for line in order.order_line.filtered('is_rental'):
@@ -326,6 +330,17 @@ class SaleOrder(models.Model):
                 "إلغاء الحجز من صلاحية مسؤول الحجوزات أو الإدارة فقط.\n\n"
                 "Cancelling a booking is reserved to booking managers and management "
                 "(PRD §17)."))
+        # «إلغاء حجز مؤكد» is a narrower right than cancelling an enquiry: once the booking
+        # is confirmed, only management may cancel it (PRD §17).
+        if not self._ss_is_management():
+            confirmed = self.filtered(lambda o: o.booking_state in self.SS_SIGNED_STATES)
+            if confirmed:
+                raise ValidationError(self.env._(
+                    "إلغاء حجز مؤكد من صلاحية الإدارة فقط (القسم 17).\n"
+                    "الحجوزات: %(orders)s\n\n"
+                    "Cancelling a CONFIRMED booking is reserved to management (PRD §17); a "
+                    "bookings manager may still cancel an enquiry or a tentative hold.",
+                    orders=", ".join(confirmed.mapped('display_name'))))
         for order in self:
             order.booking_state = 'cancelled'
             if order.state != 'cancel':
@@ -442,12 +457,63 @@ class SaleOrder(models.Model):
                     guests=order.guest_count, capacity=capacity, tolerance=tolerance))
 
     # ------------------------------------------------------------------- CON-06
+    # Changing any of these is «تغيير السعر» or «التعديل بعد التوقيع» once the contract has
+    # been signed — management only (PRD §17, spec §23.1 item 14).
+    SS_COMMERCIAL_FIELDS = (
+        'rental_start_date', 'rental_return_date', 'order_line',
+        'partner_id', 'pricelist_id', 'event_type',
+    )
+    SS_SIGNED_STATES = ('confirmed', 'ready', 'completed')
+
+    # A view cannot call has_group(), so the answer is exposed as a computed helper. It is
+    # not stored and not part of the field inventory of spec §7 — it carries no business
+    # data, it only lets the form show a field readonly for the right people.
+    ss_is_management = fields.Boolean(
+        string="Management session", compute='_compute_ss_is_management')
+
+    def _compute_ss_is_management(self):
+        is_management = self.env.user.has_group('seven_stars_rental.group_ss_manager')
+        for order in self:
+            order.ss_is_management = is_management
+
+    def _ss_is_management(self):
+        return self.env.user.has_group('seven_stars_rental.group_ss_manager')
+
+    def _ss_check_management_only_write(self, vals):
+        """PRD §17 — the clerk and the bookings manager alike are barred from editing a
+        booking after its contract is signed, and from setting the agreed deposit.
+
+        «الموافقة على التمديد» is covered by the same rule: extending a confirmed booking
+        means moving rental_return_date, which is in the guarded list.
+        """
+        if self._ss_is_management():
+            return
+        if 'required_deposit_amount' in vals:
+            raise ValidationError(self.env._(
+                "تحديد قيمة العربون المطلوب من صلاحية الإدارة فقط (القسم 17).\n\n"
+                "Setting the agreed deposit is reserved to management (PRD §17)."))
+        touched = set(vals) & set(self.SS_COMMERCIAL_FIELDS)
+        if not touched:
+            return
+        signed = self.filtered(
+            lambda o: o.is_rental_order and o.booking_state in self.SS_SIGNED_STATES)
+        if signed:
+            raise ValidationError(self.env._(
+                "لا يمكن تعديل حجز بعد توقيع العقد إلا بصلاحية الإدارة (القسم 17).\n"
+                "الحجوزات: %(orders)s\nالحقول: %(fields)s\n\n"
+                "Editing a booking after its contract has been signed — including extending "
+                "it — is reserved to management (PRD §17).",
+                orders=", ".join(signed.mapped('display_name')),
+                fields=", ".join(sorted(touched))))
+
     def write(self, vals):
         """CON-06 — the hall cannot change after confirmation.
 
         «هل يمكن تغيير القاعة بعد التأكيد؟ لا» (spec §23.1). The dates may still move — that
         is what postponement is, and CON-01 re-checks them — but the hall itself is fixed.
         """
+        self._ss_check_management_only_write(vals)
+
         locked = self.browse()
         halls_before = {}
         if 'order_line' in vals:

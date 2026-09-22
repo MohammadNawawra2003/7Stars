@@ -118,7 +118,13 @@ class TestSeasonalPricing(SevenStarsCommon):
 @tagged('post_install', '-at_install')
 class TestDiscountCeiling(SevenStarsCommon):
     """CON-02. Odoo has no maximum-discount field anywhere — T11 wrote 10% and nothing
-    objected."""
+    objected.
+
+    Refined in Phase 5 by the PRD §17 matrix, which is stricter than the 5% ceiling alone:
+    «منع موظف الحجوزات ومدير الحجوزات من ... منح الخصم» bars the clerk AND the bookings
+    manager from discounting at all. The 5% is therefore the ceiling on MANAGEMENT's own
+    manual discount, and going above it needs a formally approved price.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -127,27 +133,43 @@ class TestDiscountCeiling(SevenStarsCommon):
         cls.clerk = cls._user('test_rule_clerk', 'group_ss_clerk')
         cls.manager = cls._user('test_rule_manager', 'group_ss_manager')
 
-    def test_a_clerk_may_discount_up_to_five_percent(self):
+    def test_a_clerk_may_not_discount_at_all(self):
         order = self._booking([self.hall], *self.evening(2036, 9, 3), user=self.clerk)
-        order.with_user(self.clerk).order_line.discount = 5.0
+        with self.assertRaises(ValidationError):
+            order.with_user(self.clerk).order_line.write({'discount': 1.0})
+        self.assertEqual(order.amount_total, 14000.0)
+
+    def test_a_bookings_manager_may_not_discount_either(self):
+        """The matrix names the bookings manager alongside the clerk."""
+        booking_manager = self._user('test_rule_bm', 'group_ss_booking_manager')
+        order = self._booking([self.hall], *self.evening(2036, 10, 1), user=self.clerk)
+        with self.assertRaises(ValidationError):
+            order.with_user(booking_manager).order_line.write({'discount': 3.0})
+
+    def test_management_may_discount_up_to_five_percent(self):
+        order = self._booking([self.hall], *self.evening(2036, 9, 3), user=self.clerk)
+        order.with_user(self.manager).order_line.write({'discount': 5.0})
         self.assertEqual(order.amount_total, 13300.0)
 
-    def test_a_clerk_may_not_exceed_the_ceiling(self):
-        order = self._booking([self.hall], *self.evening(2036, 9, 10), user=self.clerk)
-        lines = order.with_user(self.clerk).order_line
+    def test_a_clerk_may_not_change_the_price_either(self):
+        """«تغيير السعر» — the other half of the same matrix row."""
+        order = self._booking([self.hall], *self.evening(2036, 10, 8), user=self.clerk)
         with self.assertRaises(ValidationError):
-            lines.discount = 10.0
+            order.with_user(self.clerk).order_line.write({'price_unit': 9000.0})
+        self.assertEqual(order.order_line.price_unit, 14000.0)
+
+    def test_management_may_not_exceed_the_ceiling_unapproved(self):
+        order = self._booking([self.hall], *self.evening(2036, 9, 10), user=self.clerk)
+        lines = order.with_user(self.manager).order_line
+        with self.assertRaises(ValidationError):
+            lines.write({'discount': 10.0})
             lines.flush_recordset()          # @api.constrains fires at flush, not on assignment
 
-    def test_management_may_exceed_the_ceiling(self):
-        order = self._booking([self.hall], *self.evening(2036, 9, 17), user=self.clerk)
-        order.with_user(self.manager).order_line.discount = 10.0
-        self.assertEqual(order.amount_total, 12600.0)
-
-    def test_an_approved_price_releases_the_ceiling_for_the_clerk(self):
+    def test_an_approved_price_releases_the_ceiling(self):
         order = self._booking([self.hall], *self.evening(2036, 9, 24), user=self.clerk)
         order.with_user(self.manager).price_approved = True
-        order.with_user(self.clerk).order_line.discount = 12.0
+        order.with_user(self.manager).order_line.write({'discount': 12.0})
+        order.order_line.flush_recordset()
         self.assertEqual(order.order_line.discount, 12.0)
 
     def test_the_ceiling_leaves_ordinary_sales_alone(self):
@@ -160,7 +182,7 @@ class TestDiscountCeiling(SevenStarsCommon):
             'order_line': [Command.create({
                 'product_id': product.product_variant_id.id, 'product_uom_qty': 1})],
         })
-        quotation.order_line.discount = 40.0
+        quotation.order_line.write({'discount': 40.0})
         quotation.order_line.flush_recordset()
         self.assertEqual(quotation.order_line.discount, 40.0)
 

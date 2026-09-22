@@ -13,7 +13,8 @@ non-accounting ledger model exists outside `account`.
 This model is the ONLY source of truth for money actually received (spec §6.1). Nothing on
 sale.order stores received money independently, so the two can never drift apart.
 """
-from odoo import fields, models
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class SevenStarsPayment(models.Model):
@@ -30,6 +31,24 @@ class SevenStarsPayment(models.Model):
         [('cash', "نقداً"), ('transfer', "حوالة بنكية")],
         string="طريقة الدفع", required=True, default='cash')
     reference = fields.Char(string="المرجع / رقم الإيصال")
+
+    @api.constrains('amount')
+    def _check_ss_refund_is_management_only(self):
+        """PRD §17 — «استرجاع الأموال» is management's.
+
+        A refund is an ordinary payment row with a negative amount, which keeps one ledger
+        instead of two. ⚠ env.su is True inside every @api.constrains in Odoo 19 and cannot
+        be used to spot an administrator; env.user is the real caller.
+        """
+        for payment in self:
+            if payment.amount >= 0:
+                continue
+            if payment.env.user.has_group('seven_stars_rental.group_ss_manager'):
+                continue
+            raise ValidationError(payment.env._(
+                "استرجاع الأموال من صلاحية الإدارة فقط (القسم 17).\n\n"
+                "Recording a refund (a negative payment) is reserved to management "
+                "(PRD §17)."))
 
     def _compute_display_name(self):
         for payment in self:

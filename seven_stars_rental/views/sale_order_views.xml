@@ -74,8 +74,13 @@
                 <page string="الدفعات" name="ss_payments" invisible="not is_rental_order">
                     <group>
                         <group string="شروط الدفع">
-                            <field name="required_deposit_amount"/>
+                            <!-- readonly for everyone but management. This is a courtesy so
+                                 the restriction is visible; sale.order.write() is what
+                                 actually enforces it over RPC (PRD §17). -->
+                            <field name="required_deposit_amount"
+                                   readonly="not ss_is_management"/>
                             <field name="price_approved"/>
+                            <field name="ss_is_management" invisible="1"/>
                         </group>
                         <group string="الحساب">
                             <field name="amount_total" string="الإجمالي" readonly="1"/>
