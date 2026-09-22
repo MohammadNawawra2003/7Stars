@@ -11,75 +11,65 @@
          standalone row in demo_products.xml. The standard pricelist therefore carries
          no rows: its prices ARE the standalone ones.
 
+         The pricelist RECORDS live in seven_stars_rental/data/ss_pricelist_data.xml,
+         because the auto-selection code references them by XML ID. Only the amounts —
+         which are the client's real numbers — are here.
+
          All amounts are in ILS, which is what drives sale.order.currency_id.
          ================================================================ -->
 
-    <record id="pricelist_standard" model="product.pricelist">
-        <field name="name">سفن ستارز — التسعيرة القياسية</field>
-        <field name="currency_id" ref="base.ILS"/>
-        <field name="sequence">1</field>
-    </record>
 
-    <!-- Off-season, one hall at a time. -->
-    <record id="pricelist_winter" model="product.pricelist">
-        <field name="name">سفن ستارز — الموسم الشتوي</field>
-        <field name="currency_id" ref="base.ILS"/>
-        <field name="sequence">2</field>
-    </record>
+    <!-- December to March, one hall at a time. -->
     <record id="pricing_winter_hall_1" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_winter"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_winter"/>
         <field name="product_template_id" ref="hall_1"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="2200.0"/>
     </record>
     <record id="pricing_winter_hall_2" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_winter"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_winter"/>
         <field name="product_template_id" ref="hall_2"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="2200.0"/>
     </record>
     <record id="pricing_winter_hall_3" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_winter"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_winter"/>
         <field name="product_template_id" ref="hall_3"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="12000.0"/>
     </record>
     <record id="pricing_winter_hall_4" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_winter"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_winter"/>
         <field name="product_template_id" ref="hall_4"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="12000.0"/>
     </record>
 
-    <!-- Sunday to Thursday, one hall at a time. -->
-    <record id="pricelist_midweek" model="product.pricelist">
-        <field name="name">سفن ستارز — أيام منتصف الأسبوع</field>
-        <field name="currency_id" ref="base.ILS"/>
-        <field name="sequence">3</field>
-    </record>
+    <!-- The midweek discount, one hall at a time. Halls 3 and 4 land on the same
+         12000 as winter, because the client gave both discounts the same -2000. -->
     <record id="pricing_midweek_hall_1" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_midweek"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_midweek"/>
         <field name="product_template_id" ref="hall_1"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="2000.0"/>
     </record>
     <record id="pricing_midweek_hall_2" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_midweek"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_midweek"/>
         <field name="product_template_id" ref="hall_2"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="2000.0"/>
     </record>
     <record id="pricing_midweek_hall_3" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_midweek"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_midweek"/>
         <field name="product_template_id" ref="hall_3"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
-        <field name="price" eval="11000.0"/>
+        <field name="price" eval="12000.0"/>
     </record>
     <record id="pricing_midweek_hall_4" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_midweek"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_midweek"/>
         <field name="product_template_id" ref="hall_4"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
-        <field name="price" eval="11000.0"/>
+        <field name="price" eval="12000.0"/>
     </record>
 
     <!-- ================================================================
@@ -99,37 +89,27 @@
          is rented alone (runtime T31).
          ================================================================ -->
 
-    <record id="pricelist_wedding_pair" model="product.pricelist">
-        <field name="name">سفن ستارز — زفاف (قاعتا 3 + 4 معاً)</field>
-        <field name="currency_id" ref="base.ILS"/>
-        <field name="sequence">4</field>
-    </record>
     <record id="pricing_wedding_pair_hall_3" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="product_template_id" ref="hall_3"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="14000.0"/>
     </record>
     <record id="pricing_wedding_pair_hall_4" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="product_template_id" ref="hall_4"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="0.0"/>
     </record>
 
-    <record id="pricelist_wedding_pair_winter" model="product.pricelist">
-        <field name="name">سفن ستارز — زفاف شتوي (قاعتا 3 + 4 معاً)</field>
-        <field name="currency_id" ref="base.ILS"/>
-        <field name="sequence">5</field>
-    </record>
-    <record id="pricing_wedding_pair_winter_hall_3" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_wedding_pair_winter"/>
+    <record id="pricing_wedding_pair_reduced_hall_3" model="product.pricing">
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair_reduced"/>
         <field name="product_template_id" ref="hall_3"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="12000.0"/>
     </record>
-    <record id="pricing_wedding_pair_winter_hall_4" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_wedding_pair_winter"/>
+    <record id="pricing_wedding_pair_reduced_hall_4" model="product.pricing">
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair_reduced"/>
         <field name="product_template_id" ref="hall_4"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="0.0"/>
@@ -140,61 +120,51 @@
          own real price, including hall 4.
          ================================================================ -->
 
-    <record id="pricelist_segment_locals" model="product.pricelist">
-        <field name="name">سفن ستارز — أهل البلد</field>
-        <field name="currency_id" ref="base.ILS"/>
-        <field name="sequence">6</field>
-    </record>
     <record id="pricing_locals_hall_1" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_locals"/>
         <field name="product_template_id" ref="hall_1"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="2300.0"/>
     </record>
     <record id="pricing_locals_hall_2" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_locals"/>
         <field name="product_template_id" ref="hall_2"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="2300.0"/>
     </record>
     <record id="pricing_locals_hall_3" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_locals"/>
         <field name="product_template_id" ref="hall_3"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="13000.0"/>
     </record>
     <record id="pricing_locals_hall_4" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_locals"/>
         <field name="product_template_id" ref="hall_4"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="13000.0"/>
     </record>
 
-    <record id="pricelist_segment_family" model="product.pricelist">
-        <field name="name">سفن ستارز — عائلة المالك</field>
-        <field name="currency_id" ref="base.ILS"/>
-        <field name="sequence">7</field>
-    </record>
     <record id="pricing_family_hall_1" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_family"/>
         <field name="product_template_id" ref="hall_1"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="2000.0"/>
     </record>
     <record id="pricing_family_hall_2" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_family"/>
         <field name="product_template_id" ref="hall_2"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="2000.0"/>
     </record>
     <record id="pricing_family_hall_3" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_family"/>
         <field name="product_template_id" ref="hall_3"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="11000.0"/>
     </record>
     <record id="pricing_family_hall_4" model="product.pricing">
-        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_family"/>
         <field name="product_template_id" ref="hall_4"/>
         <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
         <field name="price" eval="11000.0"/>

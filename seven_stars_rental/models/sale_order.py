@@ -11,7 +11,13 @@ from datetime import timedelta
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
-from .res_config_settings import SAME_DAY_GAP_KEY, get_optional_float
+from .res_config_settings import (
+    GUEST_TOLERANCE_KEY, SAME_DAY_GAP_KEY, get_optional_float,
+)
+
+# The midweek discount exists but its day range was never stated, so it ships UNSET
+# in the same way as the two deferred rules of spec §8.
+MIDWEEK_WEEKDAYS_KEY = 'seven_stars_rental.midweek_weekdays'
 
 EVENT_TYPES = [
     ('wedding', "زفاف"),
@@ -262,6 +268,9 @@ class SaleOrder(models.Model):
             order.booking_state = 'confirmed'
             if order.state in ('draft', 'sent'):
                 order.action_confirm()
+            # PRD steps 11 and 13. Standard mail.activity — no cron, no automated action,
+            # no server action anywhere in this addon (spec §13).
+            order._ss_schedule_reminders()
         return True
 
     def action_mark_ready(self):
@@ -312,8 +321,7 @@ class SaleOrder(models.Model):
         The view's groups= attribute only hides the button. A method is callable over RPC by
         anyone who can reach the record, so the right to cancel is checked here too.
         """
-        if not self.env.su and not self.env.user.has_group(
-                'seven_stars_rental.group_ss_booking_manager'):
+        if not self.env.user.has_group('seven_stars_rental.group_ss_booking_manager'):
             raise ValidationError(self.env._(
                 "إلغاء الحجز من صلاحية مسؤول الحجوزات أو الإدارة فقط.\n\n"
                 "Cancelling a booking is reserved to booking managers and management "
@@ -323,3 +331,167 @@ class SaleOrder(models.Model):
             if order.state != 'cancel':
                 order.action_cancel()
         return True
+
+    # ================================================================ PHASE 4
+    # Seasonal pricing, the capacity check, the hall lock, and the two reminders.
+
+    def _ss_pricelist_for_event(self):
+        """The pricelist the event date and the chosen halls call for, or False.
+
+        The client asked for this explicitly: «اختيار قائمة الأسعار تلقائياً من تاريخ المناسبة»
+        (spec Appendix A item 14). Two discounts exist and both are −2000, taking a wedding
+        from 14000 to 12000: winter, which the client defined as «(12 حتى 3)», and midweek.
+
+        Rental lines bypass pricelist items entirely and product.pricing has no date field
+        (spec §3.3), so no standard mechanism can do this — but the custom part is only
+        *choosing* a pricelist. Every amount still comes from ordinary master data.
+        """
+        self.ensure_one()
+        if not self.rental_start_date:
+            return False
+
+        halls = self._ss_hall_products()
+        if not halls:
+            return False
+
+        reduced = self._ss_is_winter() or self._ss_is_midweek()
+        is_pair = len(halls) > 1
+        ref = self.env.ref
+        if is_pair:
+            return (ref('seven_stars_rental.pricelist_wedding_pair_reduced') if reduced
+                    else ref('seven_stars_rental.pricelist_wedding_pair'))
+        if self._ss_is_winter():
+            return ref('seven_stars_rental.pricelist_winter')
+        if self._ss_is_midweek():
+            return ref('seven_stars_rental.pricelist_midweek')
+        return ref('seven_stars_rental.pricelist_standard')
+
+    def _ss_is_winter(self):
+        """«خصم الشتاء (12 حتى 3)» — December, January, February, March."""
+        self.ensure_one()
+        return self.rental_start_date and self.rental_start_date.month in (12, 1, 2, 3)
+
+    def _ss_is_midweek(self):
+        """The midweek discount exists, but WHICH DAYS count was never stated.
+
+        So it ships UNSET, exactly like the two deferred rules of spec §8: while the
+        parameter is absent no booking is ever treated as midweek, and nothing is invented.
+        Setting seven_stars_rental.midweek_weekdays to a comma-separated list of Python
+        weekday numbers (Monday=0 … Sunday=6) turns it on with no code change.
+        """
+        self.ensure_one()
+        raw = self.env['ir.config_parameter'].sudo().get_param(MIDWEEK_WEEKDAYS_KEY, default=None)
+        if not raw or not self.rental_start_date:
+            return False
+        try:
+            days = {int(part) for part in str(raw).split(',') if part.strip() != ''}
+        except ValueError:
+            return False
+        return self.rental_start_date.weekday() in days
+
+    @api.onchange('rental_start_date', 'order_line')
+    def _onchange_ss_seasonal_pricelist(self):
+        """Suggest the right pricelist as soon as the dates and halls are known.
+
+        Getting this wrong costs the client 2,000 per booking in either direction, which is
+        why it is offered rather than left to memory. It is an onchange, so the clerk sees
+        the change before saving and can override it.
+        """
+        for order in self:
+            if order.booking_state in ('completed', 'cancelled'):
+                continue
+            suggested = order._ss_pricelist_for_event()
+            if suggested and order.pricelist_id != suggested:
+                order.pricelist_id = suggested
+                # Changing the pricelist does not reprice anything by itself:
+                # _compute_price_unit depends on product_id, product_uom_id and
+                # product_uom_qty (sale_order_line.py:590) and not on the pricelist. Without
+                # this the clerk would see the right pricelist beside the wrong total.
+                # The plain compute is used deliberately, NOT the forced one: a price a
+                # manager typed by hand still wins.
+                order.order_line._compute_price_unit()
+
+    # ------------------------------------------------------------------- CON-05
+    @api.constrains('guest_count', 'order_line', 'rental_start_date')
+    def _check_ss_guest_capacity(self):
+        """Guest count against the SUMMED capacity of every hall on the booking.
+
+        Summing is the whole point: a wedding on halls 3+4 seats 600 + 550 = 1150, which is
+        what dissolved PRD §22 item 11 — the real 800-guest case fits (spec §3.5, T28).
+
+        The overrun tolerance itself is still UNSET, so while it is pending this rule
+        enforces nothing at all. The count is always recorded and always visible.
+        """
+        tolerance = get_optional_float(self.env, GUEST_TOLERANCE_KEY)
+        if tolerance is None:
+            return
+        for order in self:
+            if not order._ss_is_live_booking() or not order.guest_count:
+                continue
+            capacity = sum(
+                hall.product_tmpl_id.hall_capacity for hall in order._ss_hall_products())
+            if not capacity:
+                continue
+            allowed = capacity * (1.0 + tolerance / 100.0)
+            if order.guest_count > allowed:
+                raise ValidationError(self.env._(
+                    "عدد المعازيم (%(guests)s) يتجاوز سعة القاعات المحجوزة (%(capacity)s) "
+                    "بأكثر من نسبة التجاوز المسموحة (%(tolerance).2f%%).\n\n"
+                    "%(guests)s guests exceed the %(capacity)s combined capacity of the "
+                    "booked halls by more than the configured %(tolerance).2f%% tolerance.",
+                    guests=order.guest_count, capacity=capacity, tolerance=tolerance))
+
+    # ------------------------------------------------------------------- CON-06
+    def write(self, vals):
+        """CON-06 — the hall cannot change after confirmation.
+
+        «هل يمكن تغيير القاعة بعد التأكيد؟ لا» (spec §23.1). The dates may still move — that
+        is what postponement is, and CON-01 re-checks them — but the hall itself is fixed.
+        """
+        locked = self.browse()
+        halls_before = {}
+        if 'order_line' in vals:
+            locked = self.filtered(
+                lambda o: o.booking_state in ('confirmed', 'ready', 'completed'))
+            halls_before = {order.id: order._ss_hall_products() for order in locked}
+
+        result = super().write(vals)
+
+        for order in locked:
+            if order._ss_hall_products() != halls_before[order.id]:
+                raise ValidationError(self.env._(
+                    "لا يمكن تغيير القاعة بعد تأكيد الحجز.\n"
+                    "القاعات المؤكدة: %(halls)s\n\n"
+                    "The hall cannot be changed once a booking is confirmed. Cancel the "
+                    "booking and create a new one, or postpone it to another date.",
+                    halls=", ".join(halls_before[order.id].mapped('display_name'))))
+        return result
+
+    # -------------------------------------------------------------- reminders
+    def _ss_schedule_reminders(self):
+        self.ensure_one()
+        if not self.rental_start_date:
+            return
+        todo = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
+        if not todo:
+            return
+        existing = self.activity_ids.filtered(lambda a: a.activity_type_id == todo)
+        summaries = existing.mapped('summary')
+
+        # PRD step 11 — fill in the operational appendix, two weeks before the event.
+        appendix_summary = "تعبئة الملحق التشغيلي"
+        if appendix_summary not in summaries:
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                date_deadline=(self.rental_start_date - timedelta(days=14)).date(),
+                summary=appendix_summary,
+                note=self.env._("املأ الملحق التشغيلي ليوم المناسبة قبل أسبوعين من الموعد."))
+
+        # PRD step 13 — the مندوب walks the hall on the day.
+        inspection_summary = "جولة المندوب قبل المناسبة"
+        if inspection_summary not in summaries:
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                date_deadline=self.rental_start_date.date(),
+                summary=inspection_summary,
+                note=self.env._("جولة تفقدية للقاعة قبل ساعتين من بداية المناسبة."))

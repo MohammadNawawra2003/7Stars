@@ -10,6 +10,7 @@
         'security/res_groups.xml',
         'security/ir.model.access.csv',
         'data/ss_base_data.xml',
+        'data/ss_pricelist_data.xml',
         'views/sale_order_views.xml',
         'views/product_template_views.xml',
         'views/res_partner_views.xml',

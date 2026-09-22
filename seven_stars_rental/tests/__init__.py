@@ -6,3 +6,4 @@ from . import test_pricing
 from . import test_payments
 from . import test_lifecycle
 from . import test_reports
+from . import test_rules

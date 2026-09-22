@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- The pricelist STRUCTURE lives in the business addon because the code references these
+     records by XML ID when it selects one from the event date. The PRICES do not: every
+     product.pricing row is master data and ships in seven_stars_rental_demo, so installing
+     this addon assumes no amount whatsoever.
+
+     Rental lines bypass pricelist ITEMS entirely (spec §3.3), so a pricelist here is just a
+     key that product.pricing rows hang from. There are no items and there is no rule engine. -->
+
+<record id="pricelist_standard" model="product.pricelist">
+    <field name="name">سفن ستارز — التسعيرة القياسية</field>
+    <field name="currency_id" ref="base.ILS"/>
+    <field name="sequence">1</field>
+</record>
+
+<!-- «خصم الشتاء (12 حتى 3)» — December to March, −2000 (spec Appendix A item 14, §23.1). -->
+<record id="pricelist_winter" model="product.pricelist">
+    <field name="name">سفن ستارز — الموسم الشتوي (كانون الأول — آذار)</field>
+    <field name="currency_id" ref="base.ILS"/>
+    <field name="sequence">2</field>
+</record>
+
+<!-- «خصم أيام وسط الأسبوع» — also −2000, so it reaches the same 12000. -->
+<record id="pricelist_midweek" model="product.pricelist">
+    <field name="name">سفن ستارز — أيام وسط الأسبوع</field>
+    <field name="currency_id" ref="base.ILS"/>
+    <field name="sequence">3</field>
+</record>
+
+<!-- The wedding PAIR: halls 3 and 4 booked together for ONE price (spec §3.5). -->
+<record id="pricelist_wedding_pair" model="product.pricelist">
+    <field name="name">سفن ستارز — زفاف (قاعتا 3 + 4 معاً)</field>
+    <field name="currency_id" ref="base.ILS"/>
+    <field name="sequence">4</field>
+</record>
+
+<!-- One reduced pair pricelist serves BOTH the winter and the midweek discount, because the
+     client gave both the same −2000 (14000 → 12000). Two separate lists carrying identical
+     numbers would be two places to keep in step for no gain. -->
+<record id="pricelist_wedding_pair_reduced" model="product.pricelist">
+    <field name="name">سفن ستارز — زفاف بسعر مخفّض (شتوي أو وسط الأسبوع)</field>
+    <field name="currency_id" ref="base.ILS"/>
+    <field name="sequence">5</field>
+</record>
+
+<!-- Customer segments (spec §23.3 G4). Never auto-selected: who counts as أهل البلد or
+     عائلة المالك is a human judgement, so the clerk picks these by hand. -->
+<record id="pricelist_segment_locals" model="product.pricelist">
+    <field name="name">سفن ستارز — أهل البلد</field>
+    <field name="currency_id" ref="base.ILS"/>
+    <field name="sequence">6</field>
+</record>
+
+<record id="pricelist_segment_family" model="product.pricelist">
+    <field name="name">سفن ستارز — عائلة المالك</field>
+    <field name="currency_id" ref="base.ILS"/>
+    <field name="sequence">7</field>
+</record>
+
+</odoo>
