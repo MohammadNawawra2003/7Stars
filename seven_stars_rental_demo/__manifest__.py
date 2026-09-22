@@ -30,6 +30,7 @@
         'data/demo_products.xml',
         'data/demo_pricelists.xml',
         'data/demo_bookings.xml',
+        'data/demo_payments.xml',
     ],
     'installable': True,
     'application': False,

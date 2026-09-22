@@ -21,6 +21,7 @@
         <field name="rental_return_date">2026-05-15 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="800"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">completed</field>
         <field name="internal_note_men">زفاف مكتمل — قاعتا 3+4</field>
         <field name="order_line" eval="[
@@ -45,6 +46,7 @@
         <field name="rental_return_date">2026-06-12 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="350"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">completed</field>
         <field name="internal_note_men">غداء مكتمل</field>
         <field name="order_line" eval="[
@@ -64,6 +66,7 @@
         <field name="rental_return_date">2026-07-03 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="300"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">completed</field>
         <field name="internal_note_men">غداء مكتمل</field>
         <field name="order_line" eval="[
@@ -83,6 +86,7 @@
         <field name="rental_return_date">2026-08-14 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="900"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">completed</field>
         <field name="internal_note_men">زفاف مكتمل</field>
         <field name="order_line" eval="[
@@ -107,6 +111,7 @@
         <field name="rental_return_date">2026-09-04 20:00:00</field>
         <field name="event_type">henna</field>
         <field name="guest_count" eval="400"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">completed</field>
         <field name="internal_note_men">حنة في قاعة النساء وحدها — تسعيرة قياسية</field>
         <field name="order_line" eval="[
@@ -126,6 +131,7 @@
         <field name="rental_return_date">2026-06-19 20:00:00</field>
         <field name="event_type">engagement</field>
         <field name="guest_count" eval="200"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">cancelled</field>
         <field name="internal_note_men">خطوبة ملغاة</field>
         <field name="order_line" eval="[
@@ -145,6 +151,7 @@
         <field name="rental_return_date">2026-11-06 20:00:00</field>
         <field name="event_type">aqiqa</field>
         <field name="guest_count" eval="150"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">cancelled</field>
         <field name="internal_note_men">عقيقة ملغاة</field>
         <field name="order_line" eval="[
@@ -164,6 +171,7 @@
         <field name="rental_return_date">2026-09-25 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="850"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">ready</field>
         <field name="internal_note_men">زفاف جاهز للمناسبة</field>
         <field name="order_line" eval="[
@@ -188,6 +196,7 @@
         <field name="rental_return_date">2026-09-26 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="380"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">ready</field>
         <field name="internal_note_men">غداء جاهز</field>
         <field name="order_line" eval="[
@@ -207,6 +216,7 @@
         <field name="rental_return_date">2026-09-27 20:00:00</field>
         <field name="event_type">tawjihi</field>
         <field name="guest_count" eval="300"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">ready</field>
         <field name="internal_note_men">حفل توجيهي جاهز</field>
         <field name="order_line" eval="[
@@ -226,6 +236,7 @@
         <field name="rental_return_date">2026-10-09 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="780"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">زفاف مؤكد</field>
         <field name="order_line" eval="[
@@ -250,6 +261,7 @@
         <field name="rental_return_date">2026-10-09 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="300"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">غداء في اليوم نفسه — قاعة مختلفة، وهذا مسموح</field>
         <field name="order_line" eval="[
@@ -269,6 +281,7 @@
         <field name="rental_return_date">2026-10-16 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="950"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">زفاف مؤكد</field>
         <field name="order_line" eval="[
@@ -293,6 +306,7 @@
         <field name="rental_return_date">2026-10-23 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="360"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">غداء مؤكد</field>
         <field name="order_line" eval="[
@@ -312,6 +326,7 @@
         <field name="rental_return_date">2026-10-23 20:00:00</field>
         <field name="event_type">students</field>
         <field name="guest_count" eval="280"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">حفل طلبة في اليوم نفسه — قاعة مختلفة</field>
         <field name="order_line" eval="[
@@ -331,6 +346,7 @@
         <field name="rental_return_date">2026-11-13 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="700"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">زفاف شتوي — تسعيرة الزوج الشتوية 12000</field>
         <field name="order_line" eval="[
@@ -355,6 +371,7 @@
         <field name="rental_return_date">2026-11-20 20:00:00</field>
         <field name="event_type">henna</field>
         <field name="guest_count" eval="250"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">حنة مؤكدة</field>
         <field name="order_line" eval="[
@@ -374,6 +391,7 @@
         <field name="rental_return_date">2026-12-11 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="640"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">زفاف شتوي</field>
         <field name="order_line" eval="[
@@ -398,6 +416,7 @@
         <field name="rental_return_date">2027-01-15 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="800"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">awaiting</field>
         <field name="internal_note_men">بانتظار العربون وتوقيع العقد</field>
         <field name="order_line" eval="[
@@ -422,6 +441,7 @@
         <field name="rental_return_date">2027-02-05 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="340"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">awaiting</field>
         <field name="internal_note_men">بانتظار العربون</field>
         <field name="order_line" eval="[
@@ -441,6 +461,7 @@
         <field name="rental_return_date">2027-02-19 20:00:00</field>
         <field name="event_type">tawjihi</field>
         <field name="guest_count" eval="500"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">awaiting</field>
         <field name="internal_note_men">قاعة الرجال وحدها — تسعيرة قياسية 14000</field>
         <field name="order_line" eval="[
@@ -460,6 +481,7 @@
         <field name="rental_return_date">2027-03-12 20:00:00</field>
         <field name="event_type">students</field>
         <field name="guest_count" eval="280"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">awaiting</field>
         <field name="internal_note_men">بانتظار العربون</field>
         <field name="order_line" eval="[
@@ -479,6 +501,7 @@
         <field name="rental_return_date">2027-04-02 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="900"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">tentative</field>
         <field name="internal_note_men">حجز مبدئي غير ثابت</field>
         <field name="order_line" eval="[
@@ -503,6 +526,7 @@
         <field name="rental_return_date">2027-04-09 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="390"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">tentative</field>
         <field name="internal_note_men">حجز مبدئي</field>
         <field name="order_line" eval="[
@@ -522,6 +546,7 @@
         <field name="rental_return_date">2027-04-16 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="320"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">tentative</field>
         <field name="internal_note_men">حجز مبدئي</field>
         <field name="order_line" eval="[
@@ -541,6 +566,7 @@
         <field name="rental_return_date">2027-05-07 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="1100"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">tentative</field>
         <field name="internal_note_men">1100 معزوم — يتسع لأن قاعتي 3+4 معاً تسعان 1150</field>
         <field name="order_line" eval="[
@@ -565,6 +591,7 @@
         <field name="rental_return_date">2027-05-14 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="750"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">draft</field>
         <field name="internal_note_men">استفسار — مسودة</field>
         <field name="order_line" eval="[
@@ -589,6 +616,7 @@
         <field name="rental_return_date">2027-05-21 20:00:00</field>
         <field name="event_type">engagement</field>
         <field name="guest_count" eval="220"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">draft</field>
         <field name="internal_note_men">استفسار — مسودة</field>
         <field name="order_line" eval="[
@@ -608,6 +636,7 @@
         <field name="rental_return_date">2027-06-04 20:00:00</field>
         <field name="event_type">aqiqa</field>
         <field name="guest_count" eval="180"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">draft</field>
         <field name="internal_note_men">استفسار — مسودة</field>
         <field name="order_line" eval="[
@@ -627,6 +656,7 @@
         <field name="rental_return_date">2027-06-11 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="820"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">postponed</field>
         <field name="internal_note_men">مؤجل بناءً على طلب العميل</field>
         <field name="order_line" eval="[
@@ -651,6 +681,7 @@
         <field name="rental_return_date">2027-06-18 13:00:00</field>
         <field name="event_type">lunch</field>
         <field name="guest_count" eval="370"/>
+        <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">تسعيرة أهل البلد</field>
         <field name="order_line" eval="[
@@ -670,6 +701,7 @@
         <field name="rental_return_date">2027-06-25 20:00:00</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="520"/>
+        <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">تسعيرة عائلة المالك — قاعة الرجال وحدها</field>
         <field name="order_line" eval="[

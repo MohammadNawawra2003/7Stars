@@ -9,12 +9,48 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
 
-            <!-- The eight PRD states, alongside the standard four. They are independent
-                 fields and were verified coexisting at runtime (T4). -->
+            <!-- The seven custom buttons (spec §9.1). Eight states minus `draft`, which is
+                 where a booking is created, leaves exactly seven transitions. Print, the
+                 standard confirm and the chatter are reused as they are and not counted. -->
             <xpath expr="//header/field[@name='state']" position="before">
+                <button name="action_hold_tentative" type="object" class="btn-primary"
+                        string="حجز مبدئي"
+                        invisible="not is_rental_order or booking_state != 'draft'"/>
+                <button name="action_await_deposit" type="object" class="btn-primary"
+                        string="انتظار العربون وتوقيع العقد"
+                        invisible="not is_rental_order or booking_state != 'tentative'"/>
+                <button name="action_confirm_booking" type="object" class="btn-primary"
+                        string="تأكيد الحجز"
+                        invisible="not is_rental_order or booking_state != 'awaiting'"/>
+                <button name="action_mark_ready" type="object" class="btn-primary"
+                        string="جاهز للمناسبة"
+                        invisible="not is_rental_order or booking_state != 'confirmed'"/>
+                <button name="action_close_booking" type="object" class="btn-primary"
+                        string="إغلاق الحجز"
+                        invisible="not is_rental_order or booking_state != 'ready'"/>
+                <button name="action_postpone" type="object"
+                        string="تأجيل"
+                        invisible="not is_rental_order or booking_state not in ('confirmed', 'ready')"/>
+                <button name="action_cancel_booking" type="object"
+                        string="إلغاء الحجز"
+                        groups="seven_stars_rental.group_ss_booking_manager"
+                        invisible="not is_rental_order or booking_state in ('cancelled', 'completed')"/>
+
+                <!-- The eight PRD states, alongside the standard four. They are independent
+                     fields and were verified coexisting at runtime (T4). -->
                 <field name="booking_state" widget="statusbar"
                        invisible="not is_rental_order"
                        statusbar_visible="draft,tentative,awaiting,confirmed,ready,completed"/>
+            </xpath>
+
+            <!-- This workflow creates no customer invoice (spec §1.2), so the buttons that
+                 would start one are hidden on a rental order and left untouched everywhere
+                 else. Verified T8. -->
+            <xpath expr="//button[@id='create_invoice']" position="attributes">
+                <attribute name="invisible">invoice_status != 'to invoice' or is_rental_order</attribute>
+            </xpath>
+            <xpath expr="//button[@id='create_invoice_percentage']" position="attributes">
+                <attribute name="invisible">invoice_status != 'no' or state != 'sale' or is_rental_order</attribute>
             </xpath>
 
             <xpath expr="//notebook/page[@name='order_lines']" position="before">
@@ -31,6 +67,33 @@
                                    placeholder="ملاحظات قاعة النساء…"/>
                         </group>
                     </group>
+                </page>
+
+                <!-- Payments. These rows are the ONLY record of money actually received
+                     (spec §6.1); everything beside them is a stored compute over them. -->
+                <page string="الدفعات" name="ss_payments" invisible="not is_rental_order">
+                    <group>
+                        <group string="شروط الدفع">
+                            <field name="required_deposit_amount"/>
+                            <field name="price_approved"/>
+                        </group>
+                        <group string="الحساب">
+                            <field name="amount_total" string="الإجمالي" readonly="1"/>
+                            <field name="collected_amount" readonly="1"/>
+                            <field name="outstanding_amount" readonly="1"
+                                   decoration-danger="outstanding_amount &gt; 0"
+                                   decoration-success="outstanding_amount &lt;= 0"/>
+                        </group>
+                    </group>
+                    <field name="payment_ids">
+                        <list editable="bottom">
+                            <field name="date"/>
+                            <field name="amount"/>
+                            <field name="method"/>
+                            <field name="reference"/>
+                            <field name="currency_id" column_invisible="True"/>
+                        </list>
+                    </field>
                 </page>
             </xpath>
 

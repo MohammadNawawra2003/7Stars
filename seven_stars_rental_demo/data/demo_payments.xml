@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Payment history. Every shekel that arrives is one row here and nowhere else — this
+         is the only source of truth for money actually received (spec §6.1). collected_amount
+         and outstanding_amount on the booking are stored computes over these rows, so the
+         two can never drift apart, and no "is this the deposit?" flag exists: the deposit is
+         simply the first payment, and the confirmation gate only ever asks how much has
+         arrived in total.
+
+         Deliberate coverage:
+           completed bookings  balance driven to exactly 0.00
+           booking_008         READY and fully settled, so «إغلاق الحجز» works on it today
+           confirmed bookings  deposit received, balance still open
+           awaiting bookings   NO rows at all — that is what "awaiting the deposit" means
+           tentative / draft   no money has been discussed yet
+    -->
+    <record id="payment_001_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_001"/>
+        <field name="date">2025-12-10</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2025-001</field>
+    </record>
+    <record id="payment_001_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_001"/>
+        <field name="date">2026-03-20</field>
+        <field name="amount" eval="6000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-014</field>
+    </record>
+    <record id="payment_001_3" model="seven.stars.payment">
+        <field name="order_id" ref="booking_001"/>
+        <field name="date">2026-05-14</field>
+        <field name="amount" eval="5000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-031</field>
+    </record>
+    <record id="payment_002_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_002"/>
+        <field name="date">2026-04-02</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-008</field>
+    </record>
+    <record id="payment_002_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_002"/>
+        <field name="date">2026-06-11</field>
+        <field name="amount" eval="1500.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-036</field>
+    </record>
+    <record id="payment_003_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_003"/>
+        <field name="date">2026-05-06</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-019</field>
+    </record>
+    <record id="payment_003_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_003"/>
+        <field name="date">2026-07-02</field>
+        <field name="amount" eval="1500.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-048</field>
+    </record>
+    <record id="payment_004_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_004"/>
+        <field name="date">2026-02-18</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-004</field>
+    </record>
+    <record id="payment_004_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_004"/>
+        <field name="date">2026-06-25</field>
+        <field name="amount" eval="6000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-041</field>
+    </record>
+    <record id="payment_004_3" model="seven.stars.payment">
+        <field name="order_id" ref="booking_004"/>
+        <field name="date">2026-08-13</field>
+        <field name="amount" eval="5000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-059</field>
+    </record>
+    <record id="payment_005_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_005"/>
+        <field name="date">2026-05-30</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-027</field>
+    </record>
+    <record id="payment_005_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_005"/>
+        <field name="date">2026-09-03</field>
+        <field name="amount" eval="11000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-071</field>
+    </record>
+    <record id="payment_008_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_008"/>
+        <field name="date">2026-04-15</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-011</field>
+    </record>
+    <record id="payment_008_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_008"/>
+        <field name="date">2026-08-01</field>
+        <field name="amount" eval="6000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-055</field>
+    </record>
+    <record id="payment_008_3" model="seven.stars.payment">
+        <field name="order_id" ref="booking_008"/>
+        <field name="date">2026-09-20</field>
+        <field name="amount" eval="5000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-078</field>
+    </record>
+    <record id="payment_009_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_009"/>
+        <field name="date">2026-07-14</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-050</field>
+    </record>
+    <record id="payment_010_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_010"/>
+        <field name="date">2026-07-21</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-052</field>
+    </record>
+    <record id="payment_010_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_010"/>
+        <field name="date">2026-09-15</field>
+        <field name="amount" eval="800.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-075</field>
+    </record>
+    <record id="payment_011_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_011"/>
+        <field name="date">2026-05-05</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-022</field>
+    </record>
+    <record id="payment_012_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_012"/>
+        <field name="date">2026-06-30</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-045</field>
+    </record>
+    <record id="payment_013_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_013"/>
+        <field name="date">2026-05-12</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-025</field>
+    </record>
+    <record id="payment_013_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_013"/>
+        <field name="date">2026-08-20</field>
+        <field name="amount" eval="4000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-063</field>
+    </record>
+    <record id="payment_014_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_014"/>
+        <field name="date">2026-07-07</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-049</field>
+    </record>
+    <record id="payment_015_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_015"/>
+        <field name="date">2026-08-04</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-061</field>
+    </record>
+    <record id="payment_016_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_016"/>
+        <field name="date">2026-06-02</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-038</field>
+    </record>
+    <record id="payment_017_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_017"/>
+        <field name="date">2026-08-18</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-062</field>
+    </record>
+    <record id="payment_018_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_018"/>
+        <field name="date">2026-07-09</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-051</field>
+    </record>
+    <record id="payment_018_2" model="seven.stars.payment">
+        <field name="order_id" ref="booking_018"/>
+        <field name="date">2026-09-10</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-073</field>
+    </record>
+    <record id="payment_030_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_030"/>
+        <field name="date">2026-09-01</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-069</field>
+    </record>
+    <record id="payment_031_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_031"/>
+        <field name="date">2026-09-08</field>
+        <field name="amount" eval="1000.0"/>
+        <field name="method">cash</field>
+        <field name="reference">REC-2026-072</field>
+    </record>
+    <record id="payment_032_1" model="seven.stars.payment">
+        <field name="order_id" ref="booking_032"/>
+        <field name="date">2026-09-12</field>
+        <field name="amount" eval="3000.0"/>
+        <field name="method">transfer</field>
+        <field name="reference">REC-2026-074</field>
+    </record>
+
+</odoo>
