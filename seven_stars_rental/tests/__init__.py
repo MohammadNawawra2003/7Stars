@@ -8,3 +8,4 @@ from . import test_lifecycle
 from . import test_reports
 from . import test_rules
 from . import test_security
+from . import test_migration

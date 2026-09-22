@@ -6,6 +6,7 @@ date constraint is a single-row SQL CHECK (sale_renting/models/sale_order.py:24)
 structurally unable to compare two rows. The gantt's consolidation_max is 1e9. Availability
 is therefore entirely ours (spec §3.1).
 """
+import logging
 from datetime import timedelta
 
 from odoo import api, fields, models
@@ -15,9 +16,15 @@ from .res_config_settings import (
     GUEST_TOLERANCE_KEY, SAME_DAY_GAP_KEY, get_optional_float,
 )
 
+_logger = logging.getLogger(__name__)
+
 # The midweek discount exists but its day range was never stated, so it ships UNSET
 # in the same way as the two deferred rules of spec §8.
 MIDWEEK_WEEKDAYS_KEY = 'seven_stars_rental.midweek_weekdays'
+
+# Phase 6. The ONLY way CON-01 can be stood down, and only for a controlled historical
+# import. Never a disabled constraint and never a global switch.
+SS_MIGRATION_CONTEXT_KEY = 'ss_migration_import'
 
 EVENT_TYPES = [
     ('wedding', "زفاف"),
@@ -148,10 +155,74 @@ class SaleOrder(models.Model):
             and self.rental_return_date
         )
 
+    # --------------------------------------------------- Phase 6, historical import
+    def _ss_migration_bypass_active(self):
+        """True only inside a controlled historical import run.
+
+        TWO conditions, both required: the explicit context flag AND a management user.
+        The flag alone would be worthless, because context travels from the client on every
+        RPC call — an ordinary user could otherwise switch availability checking off simply
+        by asking for it. Proven by test_migration.py, which also proves CON-01 goes back to
+        refusing overlaps the moment the run is over.
+        """
+        if not self.env.context.get(SS_MIGRATION_CONTEXT_KEY):
+            return False
+        if not self.env.user.has_group('seven_stars_rental.group_ss_manager'):
+            _logger.warning(
+                "Seven Stars: %s was passed by %s, who is not management. CON-01 stays on.",
+                SS_MIGRATION_CONTEXT_KEY, self.env.user.login)
+            return False
+        return True
+
+    @api.model
+    def ss_find_import_conflicts(self, rows):
+        """Audit source data for the overlaps CON-01 would refuse — BEFORE importing.
+
+        `rows` are dicts with `ref`, `hall`, `start`, `end` and optional `prep`/`cleanup`
+        (hours, defaulting to the PRD's 4 and 5). Returns one entry per clashing pair, so
+        the conflict list can be taken to the client and cleaned or approved. Each pair is
+        either bad source data to correct or a genuine past event the client must confirm;
+        it is not something to bypass because the import is inconvenient.
+
+        The comparison is the same half-open envelope rule CON-01 itself uses, so the audit
+        cannot disagree with the constraint.
+        """
+        by_hall = {}
+        for row in rows:
+            start = fields.Datetime.to_datetime(row['start'])
+            end = fields.Datetime.to_datetime(row['end'])
+            prep = timedelta(hours=float(row.get('prep', 4.0)))
+            cleanup = timedelta(hours=float(row.get('cleanup', 5.0)))
+            by_hall.setdefault(row['hall'], []).append(
+                (row['ref'], start - prep, end + cleanup, start, end))
+
+        conflicts = []
+        for hall, entries in by_hall.items():
+            entries.sort(key=lambda entry: entry[1])
+            for i, left in enumerate(entries):
+                for right in entries[i + 1:]:
+                    if right[1] >= left[2]:
+                        break            # sorted by envelope start: nothing later can clash
+                    if left[1] < right[2] and right[1] < left[2]:
+                        conflicts.append({
+                            'hall': hall,
+                            'refs': (left[0], right[0]),
+                            'windows': ((left[3], left[4]), (right[3], right[4])),
+                            'envelopes': ((left[1], left[2]), (right[1], right[2])),
+                        })
+        return conflicts
+
     # ------------------------------------------------------------------- CON-01
     @api.constrains('rental_start_date', 'rental_return_date', 'order_line',
                     'state', 'booking_state')
     def _check_hall_availability(self):
+        if self._ss_migration_bypass_active():
+            _logger.warning(
+                "Seven Stars: CON-01 stood down for a historical import by %s (%s records). "
+                "This is expected only during a migration run.",
+                self.env.user.login, len(self))
+            return
+
         gap = get_optional_float(self.env, SAME_DAY_GAP_KEY)
         # The gap widens the envelope of the booking being checked, once — not both sides,
         # which would silently require twice the separation the client asked for.
