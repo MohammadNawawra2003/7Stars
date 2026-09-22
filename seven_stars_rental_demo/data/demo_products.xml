@@ -18,12 +18,14 @@
          balance, the receipts and the contracts disagree with the agreed price
          (spec §3.6, runtime T32).
 
-         hall_capacity / prep_time / cleanup_time arrive in Phase 1 with the fields.
+         hall_capacity is set per hall; prep_time (4h) and cleanup_time (5h) keep their
+         field defaults, which are exactly the buffers the PRD specifies.
          ================================================================ -->
 
     <record id="hall_1" model="product.template">
         <field name="name">قاعة 1 — الغداء (Hall 1 · Lunch)</field>
         <field name="default_code">SS-HALL-1</field>
+        <field name="hall_capacity" eval="400"/>
         <field name="type">service</field>
         <field name="categ_id" ref="product_category_hall"/>
         <field name="rent_ok" eval="True"/>
@@ -34,6 +36,7 @@
     <record id="hall_2" model="product.template">
         <field name="name">قاعة 2 — الغداء (Hall 2 · Lunch)</field>
         <field name="default_code">SS-HALL-2</field>
+        <field name="hall_capacity" eval="400"/>
         <field name="type">service</field>
         <field name="categ_id" ref="product_category_hall"/>
         <field name="rent_ok" eval="True"/>
@@ -44,6 +47,7 @@
     <record id="hall_3" model="product.template">
         <field name="name">قاعة 3 — الرجال (Hall 3 · Wedding Men)</field>
         <field name="default_code">SS-HALL-3</field>
+        <field name="hall_capacity" eval="600"/>
         <field name="type">service</field>
         <field name="categ_id" ref="product_category_hall"/>
         <field name="rent_ok" eval="True"/>
@@ -54,6 +58,7 @@
     <record id="hall_4" model="product.template">
         <field name="name">قاعة 4 — النساء (Hall 4 · Wedding Women)</field>
         <field name="default_code">SS-HALL-4</field>
+        <field name="hall_capacity" eval="550"/>
         <field name="type">service</field>
         <field name="categ_id" ref="product_category_hall"/>
         <field name="rent_ok" eval="True"/>
@@ -204,5 +209,65 @@
         <field name="list_price" eval="3500.0"/>
         <field name="taxes_id" eval="[(6, 0, [])]"/>
     </record>
+
+    <!-- product.product aliases. A booking line carries a product.product, while every record
+         above is a product.template. This is the standard Odoo idiom for addressing the single
+         variant of a template — sale_renting/data/rental_demo.xml uses the same call. It
+         creates XML IDs; it is not business logic. -->
+    <function model="ir.model.data" name="_update_xmlids">
+        <value model="base" eval="[
+            {'xml_id': 'seven_stars_rental_demo.hall_1_product',
+             'record': obj().env.ref('seven_stars_rental_demo.hall_1').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.hall_2_product',
+             'record': obj().env.ref('seven_stars_rental_demo.hall_2').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.hall_3_product',
+             'record': obj().env.ref('seven_stars_rental_demo.hall_3').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.hall_4_product',
+             'record': obj().env.ref('seven_stars_rental_demo.hall_4').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_001_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_001').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_002_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_002').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_003_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_003').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_004_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_004').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_005_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_005').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_006_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_006').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_007_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_007').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_008_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_008').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_009_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_009').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.service_010_product',
+             'record': obj().env.ref('seven_stars_rental_demo.service_010').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.package_001_product',
+             'record': obj().env.ref('seven_stars_rental_demo.package_001').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.package_002_product',
+             'record': obj().env.ref('seven_stars_rental_demo.package_002').product_variant_id,
+             'noupdate': False},
+            {'xml_id': 'seven_stars_rental_demo.package_003_product',
+             'record': obj().env.ref('seven_stars_rental_demo.package_003').product_variant_id,
+             'noupdate': False}
+        ]"/>
+    </function>
 
 </odoo>

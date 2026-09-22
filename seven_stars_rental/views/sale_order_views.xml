@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- SCR-02. The booking form is the standard rental order form plus this inherit.
+         No new screen is created anywhere in this project (spec §9). -->
+    <record id="view_order_form_seven_stars" model="ir.ui.view">
+        <field name="name">sale.order.form.seven.stars</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- The eight PRD states, alongside the standard four. They are independent
+                 fields and were verified coexisting at runtime (T4). -->
+            <xpath expr="//header/field[@name='state']" position="before">
+                <field name="booking_state" widget="statusbar"
+                       invisible="not is_rental_order"
+                       statusbar_visible="draft,tentative,awaiting,confirmed,ready,completed"/>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='order_lines']" position="before">
+                <page string="الحجز" name="ss_booking" invisible="not is_rental_order">
+                    <group>
+                        <group string="المناسبة">
+                            <field name="event_type"/>
+                            <field name="guest_count"/>
+                        </group>
+                        <group string="ملاحظات داخلية">
+                            <field name="internal_note_men" nolabel="1"
+                                   placeholder="ملاحظات قاعة الرجال…"/>
+                            <field name="internal_note_women" nolabel="1"
+                                   placeholder="ملاحظات قاعة النساء…"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

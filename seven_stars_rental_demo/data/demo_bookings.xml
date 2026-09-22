@@ -1,0 +1,684 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Thirty-two bookings across the scenario matrix of spec §18: every one of the eight
+         booking states, single-hall and multi-hall, past and future, each pricelist family,
+         and same-day pairs in DIFFERENT halls (which is the only same-day pairing the 4h
+         preparation and 5h cleanup buffers allow).
+
+         No record here overlaps another on the same hall. Conflicts are exercised in
+         tests/, never shipped as data — CON-01 would refuse them and the addon would fail
+         to install, which is exactly the guarantee this file relies on.
+
+         Deposits, payments and balances arrive in Phase 2 with seven.stars.payment.
+    -->
+
+    <record id="booking_001" model="sale.order">
+        <field name="partner_id" ref="partner_customer_001"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2026-05-15 15:00:00</field>
+        <field name="rental_return_date">2026-05-15 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="800"/>
+        <field name="booking_state">completed</field>
+        <field name="internal_note_men">زفاف مكتمل — قاعتا 3+4</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_002" model="sale.order">
+        <field name="partner_id" ref="partner_customer_002"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-06-12 09:00:00</field>
+        <field name="rental_return_date">2026-06-12 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="350"/>
+        <field name="booking_state">completed</field>
+        <field name="internal_note_men">غداء مكتمل</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_003" model="sale.order">
+        <field name="partner_id" ref="partner_customer_003"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-07-03 09:00:00</field>
+        <field name="rental_return_date">2026-07-03 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="300"/>
+        <field name="booking_state">completed</field>
+        <field name="internal_note_men">غداء مكتمل</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_2_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_004" model="sale.order">
+        <field name="partner_id" ref="partner_customer_004"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2026-08-14 15:00:00</field>
+        <field name="rental_return_date">2026-08-14 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="900"/>
+        <field name="booking_state">completed</field>
+        <field name="internal_note_men">زفاف مكتمل</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_005" model="sale.order">
+        <field name="partner_id" ref="partner_customer_005"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-09-04 15:00:00</field>
+        <field name="rental_return_date">2026-09-04 20:00:00</field>
+        <field name="event_type">henna</field>
+        <field name="guest_count" eval="400"/>
+        <field name="booking_state">completed</field>
+        <field name="internal_note_men">حنة في قاعة النساء وحدها — تسعيرة قياسية</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_006" model="sale.order">
+        <field name="partner_id" ref="partner_customer_006"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-06-19 15:00:00</field>
+        <field name="rental_return_date">2026-06-19 20:00:00</field>
+        <field name="event_type">engagement</field>
+        <field name="guest_count" eval="200"/>
+        <field name="booking_state">cancelled</field>
+        <field name="internal_note_men">خطوبة ملغاة</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_007" model="sale.order">
+        <field name="partner_id" ref="partner_customer_007"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-11-06 15:00:00</field>
+        <field name="rental_return_date">2026-11-06 20:00:00</field>
+        <field name="event_type">aqiqa</field>
+        <field name="guest_count" eval="150"/>
+        <field name="booking_state">cancelled</field>
+        <field name="internal_note_men">عقيقة ملغاة</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_2_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_008" model="sale.order">
+        <field name="partner_id" ref="partner_customer_008"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2026-09-25 15:00:00</field>
+        <field name="rental_return_date">2026-09-25 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="850"/>
+        <field name="booking_state">ready</field>
+        <field name="internal_note_men">زفاف جاهز للمناسبة</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_009" model="sale.order">
+        <field name="partner_id" ref="partner_customer_009"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-09-26 09:00:00</field>
+        <field name="rental_return_date">2026-09-26 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="380"/>
+        <field name="booking_state">ready</field>
+        <field name="internal_note_men">غداء جاهز</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_010" model="sale.order">
+        <field name="partner_id" ref="partner_customer_010"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-09-27 15:00:00</field>
+        <field name="rental_return_date">2026-09-27 20:00:00</field>
+        <field name="event_type">tawjihi</field>
+        <field name="guest_count" eval="300"/>
+        <field name="booking_state">ready</field>
+        <field name="internal_note_men">حفل توجيهي جاهز</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_2_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_011" model="sale.order">
+        <field name="partner_id" ref="partner_customer_011"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2026-10-09 15:00:00</field>
+        <field name="rental_return_date">2026-10-09 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="780"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">زفاف مؤكد</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_012" model="sale.order">
+        <field name="partner_id" ref="partner_customer_012"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-10-09 09:00:00</field>
+        <field name="rental_return_date">2026-10-09 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="300"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">غداء في اليوم نفسه — قاعة مختلفة، وهذا مسموح</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_013" model="sale.order">
+        <field name="partner_id" ref="partner_customer_013"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2026-10-16 15:00:00</field>
+        <field name="rental_return_date">2026-10-16 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="950"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">زفاف مؤكد</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_014" model="sale.order">
+        <field name="partner_id" ref="partner_customer_014"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-10-23 09:00:00</field>
+        <field name="rental_return_date">2026-10-23 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="360"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">غداء مؤكد</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_015" model="sale.order">
+        <field name="partner_id" ref="partner_customer_015"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-10-23 15:00:00</field>
+        <field name="rental_return_date">2026-10-23 20:00:00</field>
+        <field name="event_type">students</field>
+        <field name="guest_count" eval="280"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">حفل طلبة في اليوم نفسه — قاعة مختلفة</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_2_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_016" model="sale.order">
+        <field name="partner_id" ref="partner_customer_016"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair_winter"/>
+        <field name="rental_start_date">2026-11-13 15:00:00</field>
+        <field name="rental_return_date">2026-11-13 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="700"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">زفاف شتوي — تسعيرة الزوج الشتوية 12000</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_017" model="sale.order">
+        <field name="partner_id" ref="partner_customer_017"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2026-11-20 15:00:00</field>
+        <field name="rental_return_date">2026-11-20 20:00:00</field>
+        <field name="event_type">henna</field>
+        <field name="guest_count" eval="250"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">حنة مؤكدة</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_2_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_018" model="sale.order">
+        <field name="partner_id" ref="partner_customer_018"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair_winter"/>
+        <field name="rental_start_date">2026-12-11 15:00:00</field>
+        <field name="rental_return_date">2026-12-11 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="640"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">زفاف شتوي</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_019" model="sale.order">
+        <field name="partner_id" ref="partner_customer_019"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair_winter"/>
+        <field name="rental_start_date">2027-01-15 15:00:00</field>
+        <field name="rental_return_date">2027-01-15 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="800"/>
+        <field name="booking_state">awaiting</field>
+        <field name="internal_note_men">بانتظار العربون وتوقيع العقد</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_020" model="sale.order">
+        <field name="partner_id" ref="partner_customer_020"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2027-02-05 09:00:00</field>
+        <field name="rental_return_date">2027-02-05 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="340"/>
+        <field name="booking_state">awaiting</field>
+        <field name="internal_note_men">بانتظار العربون</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_021" model="sale.order">
+        <field name="partner_id" ref="partner_customer_001"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2027-02-19 15:00:00</field>
+        <field name="rental_return_date">2027-02-19 20:00:00</field>
+        <field name="event_type">tawjihi</field>
+        <field name="guest_count" eval="500"/>
+        <field name="booking_state">awaiting</field>
+        <field name="internal_note_men">قاعة الرجال وحدها — تسعيرة قياسية 14000</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_022" model="sale.order">
+        <field name="partner_id" ref="partner_customer_002"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2027-03-12 15:00:00</field>
+        <field name="rental_return_date">2027-03-12 20:00:00</field>
+        <field name="event_type">students</field>
+        <field name="guest_count" eval="280"/>
+        <field name="booking_state">awaiting</field>
+        <field name="internal_note_men">بانتظار العربون</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_2_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_023" model="sale.order">
+        <field name="partner_id" ref="partner_customer_003"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2027-04-02 15:00:00</field>
+        <field name="rental_return_date">2027-04-02 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="900"/>
+        <field name="booking_state">tentative</field>
+        <field name="internal_note_men">حجز مبدئي غير ثابت</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_024" model="sale.order">
+        <field name="partner_id" ref="partner_customer_004"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2027-04-09 09:00:00</field>
+        <field name="rental_return_date">2027-04-09 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="390"/>
+        <field name="booking_state">tentative</field>
+        <field name="internal_note_men">حجز مبدئي</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_025" model="sale.order">
+        <field name="partner_id" ref="partner_customer_005"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2027-04-16 09:00:00</field>
+        <field name="rental_return_date">2027-04-16 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="320"/>
+        <field name="booking_state">tentative</field>
+        <field name="internal_note_men">حجز مبدئي</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_2_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_026" model="sale.order">
+        <field name="partner_id" ref="partner_customer_006"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2027-05-07 15:00:00</field>
+        <field name="rental_return_date">2027-05-07 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="1100"/>
+        <field name="booking_state">tentative</field>
+        <field name="internal_note_men">1100 معزوم — يتسع لأن قاعتي 3+4 معاً تسعان 1150</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_027" model="sale.order">
+        <field name="partner_id" ref="partner_customer_007"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2027-05-14 15:00:00</field>
+        <field name="rental_return_date">2027-05-14 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="750"/>
+        <field name="booking_state">draft</field>
+        <field name="internal_note_men">استفسار — مسودة</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_028" model="sale.order">
+        <field name="partner_id" ref="partner_customer_008"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2027-05-21 15:00:00</field>
+        <field name="rental_return_date">2027-05-21 20:00:00</field>
+        <field name="event_type">engagement</field>
+        <field name="guest_count" eval="220"/>
+        <field name="booking_state">draft</field>
+        <field name="internal_note_men">استفسار — مسودة</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_029" model="sale.order">
+        <field name="partner_id" ref="partner_customer_009"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_standard"/>
+        <field name="rental_start_date">2027-06-04 15:00:00</field>
+        <field name="rental_return_date">2027-06-04 20:00:00</field>
+        <field name="event_type">aqiqa</field>
+        <field name="guest_count" eval="180"/>
+        <field name="booking_state">draft</field>
+        <field name="internal_note_men">استفسار — مسودة</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_2_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_030" model="sale.order">
+        <field name="partner_id" ref="partner_customer_010"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="rental_start_date">2027-06-11 15:00:00</field>
+        <field name="rental_return_date">2027-06-11 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="820"/>
+        <field name="booking_state">postponed</field>
+        <field name="internal_note_men">مؤجل بناءً على طلب العميل</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        }),
+            (0, 0, {
+            'product_id': ref('hall_4_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_031" model="sale.order">
+        <field name="partner_id" ref="partner_customer_011"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="rental_start_date">2027-06-18 09:00:00</field>
+        <field name="rental_return_date">2027-06-18 13:00:00</field>
+        <field name="event_type">lunch</field>
+        <field name="guest_count" eval="370"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">تسعيرة أهل البلد</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_1_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+    <record id="booking_032" model="sale.order">
+        <field name="partner_id" ref="partner_customer_012"/>
+        <field name="is_rental_order" eval="True"/>
+        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="rental_start_date">2027-06-25 15:00:00</field>
+        <field name="rental_return_date">2027-06-25 20:00:00</field>
+        <field name="event_type">wedding</field>
+        <field name="guest_count" eval="520"/>
+        <field name="booking_state">confirmed</field>
+        <field name="internal_note_men">تسعيرة عائلة المالك — قاعة الرجال وحدها</field>
+        <field name="order_line" eval="[
+            (0, 0, {
+            'product_id': ref('hall_3_product'),
+            'product_uom_qty': 1,
+            'is_rental': True,
+        })
+        ]"/>
+    </record>
+
+</odoo>

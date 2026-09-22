@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- SCR-06, inside the Rental settings app that sale_renting already declares.
+         The screen shows the UNSET state instead of hiding it behind a number: choosing
+         "Pending" deletes the parameter, which is what keeps "not decided" different from
+         a deliberate zero (spec §8). -->
+    <record id="res_config_settings_view_form_seven_stars" model="ir.ui.view">
+        <field name="name">res.config.settings.form.seven.stars</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sale_renting.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='sale_renting']" position="inside">
+                <block title="قاعات سفن ستارز — Seven Stars Halls" name="seven_stars">
+
+                    <setting name="ss_same_day_gap"
+                             string="الفاصل بين حجزين في اليوم نفسه"
+                             help="PRD §22 item 6. True overlaps are always blocked using each hall's own preparation and cleanup time. This rule adds a FURTHER separation between two bookings that do not overlap. While it is pending, no extra separation is invented.">
+                        <div class="content-group">
+                            <field name="same_day_gap_mode" class="mt8"/>
+                            <div class="row mt8" invisible="same_day_gap_mode != 'configured'">
+                                <label for="same_day_gap_hours" class="col-lg-4 o_light_label"/>
+                                <field name="same_day_gap_hours" class="col-lg-2"/>
+                            </div>
+                        </div>
+                    </setting>
+
+                    <setting name="ss_guest_tolerance"
+                             string="نسبة التجاوز المسموحة لعدد المعازيم"
+                             help="PRD §22 item 11. The guest count is always recorded and always visible. While this rule is pending, no percentage is enforced and no booking is blocked.">
+                        <div class="content-group">
+                            <field name="guest_tolerance_mode" class="mt8"/>
+                            <div class="row mt8" invisible="guest_tolerance_mode != 'configured'">
+                                <label for="guest_tolerance_percent" class="col-lg-4 o_light_label"/>
+                                <field name="guest_tolerance_percent" class="col-lg-2"/>
+                            </div>
+                        </div>
+                    </setting>
+
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

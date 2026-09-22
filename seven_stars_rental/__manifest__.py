@@ -9,6 +9,10 @@
     'data': [
         'security/res_groups.xml',
         'data/ss_base_data.xml',
+        'views/sale_order_views.xml',
+        'views/product_template_views.xml',
+        'views/res_partner_views.xml',
+        'views/res_config_settings_views.xml',
     ],
     'installable': True,
     'application': False,           # extends the Rental app, it is not a new app

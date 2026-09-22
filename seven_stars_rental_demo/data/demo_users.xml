@@ -10,6 +10,7 @@
     <record id="user_clerk" model="res.users">
         <field name="name">سناء — موظفة حجوزات (Demo Clerk)</field>
         <field name="login">ss_clerk</field>
+        <field name="tz">Asia/Hebron</field>
         <field name="group_ids" eval="[(6, 0, [
             ref('seven_stars_rental.group_ss_clerk'),
             ref('base.group_user'),
@@ -19,6 +20,7 @@
     <record id="user_accountant" model="res.users">
         <field name="name">رامي — محاسب (Demo Accountant)</field>
         <field name="login">ss_accountant</field>
+        <field name="tz">Asia/Hebron</field>
         <field name="group_ids" eval="[(6, 0, [
             ref('seven_stars_rental.group_ss_accountant'),
             ref('base.group_user'),
@@ -28,6 +30,7 @@
     <record id="user_booking_manager" model="res.users">
         <field name="name">خالد — مسؤول الحجوزات (Demo Booking Manager)</field>
         <field name="login">ss_booking_manager</field>
+        <field name="tz">Asia/Hebron</field>
         <field name="group_ids" eval="[(6, 0, [
             ref('seven_stars_rental.group_ss_booking_manager'),
             ref('base.group_user'),
@@ -37,6 +40,7 @@
     <record id="user_manager" model="res.users">
         <field name="name">سيدة الإدارة (Demo Management)</field>
         <field name="login">ss_manager</field>
+        <field name="tz">Asia/Hebron</field>
         <field name="group_ids" eval="[(6, 0, [
             ref('seven_stars_rental.group_ss_manager'),
             ref('base.group_user'),

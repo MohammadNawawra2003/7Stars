@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- SCR-04. The three hall fields sit on the Rental tab that sale_renting already adds,
+         which is only visible when the product is rentable. -->
+    <record id="product_template_form_view_seven_stars" model="ir.ui.view">
+        <field name="name">product.template.form.seven.stars</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="sale_renting.product_template_form_view_rental"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='pricing']//group[@name='pricing']" position="before">
+                <group name="ss_hall" string="بيانات القاعة">
+                    <field name="hall_capacity"/>
+                    <field name="prep_time" widget="float_time"/>
+                    <field name="cleanup_time" widget="float_time"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

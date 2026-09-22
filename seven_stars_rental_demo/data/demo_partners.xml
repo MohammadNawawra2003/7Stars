@@ -3,7 +3,8 @@
 
     <!-- Twenty fictional customers. The tag below is what makes demo records obvious in the UI:
          filter or group Customers by «بيانات تجريبية» to see exactly what this addon created.
-         id_number / whatsapp / responsible_person arrive in Phase 1 with the fields themselves. -->
+         id_number, whatsapp and responsible_person are the three details the contracts
+         need and the standard contact does not carry (spec §7). -->
 
     <record id="partner_tag_demo" model="res.partner.category">
         <field name="name">بيانات تجريبية — Seven Stars Demo</field>
@@ -14,6 +15,9 @@
         <field name="name">أحمد محمود العمري</field>
         <field name="city">بيت لحم</field>
         <field name="phone">+970 599 100 001</field>
+        <field name="id_number">9001200001</field>
+        <field name="responsible_person">أحمد العمري</field>
+        <field name="whatsapp">+970 599 100 001</field>
         <field name="email">ahmad.omari@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -21,6 +25,8 @@
         <field name="name">سامر جورج قمصية</field>
         <field name="city">بيت جالا</field>
         <field name="phone">+970 599 100 002</field>
+        <field name="id_number">9002200002</field>
+        <field name="whatsapp">+970 599 100 002</field>
         <field name="email">samer.qumsieh@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -28,6 +34,8 @@
         <field name="name">منى خالد أبو عيد</field>
         <field name="city">الولجة</field>
         <field name="phone">+970 599 100 003</field>
+        <field name="id_number">9003200003</field>
+        <field name="whatsapp">+970 599 100 003</field>
         <field name="email">mona.abueid@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -35,6 +43,8 @@
         <field name="name">يوسف إبراهيم الشاعر</field>
         <field name="city">بيت ساحور</field>
         <field name="phone">+970 599 100 004</field>
+        <field name="id_number">9004200004</field>
+        <field name="whatsapp">+970 599 100 004</field>
         <field name="email">yousef.shaer@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -42,6 +52,8 @@
         <field name="name">رنا نبيل الحرباوي</field>
         <field name="city">بيت لحم</field>
         <field name="phone">+970 599 100 005</field>
+        <field name="id_number">9005200005</field>
+        <field name="whatsapp">+970 599 100 005</field>
         <field name="email">rana.harbawi@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -49,6 +61,8 @@
         <field name="name">عماد زياد الدبس</field>
         <field name="city">الخضر</field>
         <field name="phone">+970 599 100 006</field>
+        <field name="id_number">9006200006</field>
+        <field name="whatsapp">+970 599 100 006</field>
         <field name="email">imad.dibs@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -56,6 +70,8 @@
         <field name="name">هالة سمير عوض</field>
         <field name="city">بيت لحم</field>
         <field name="phone">+970 599 100 007</field>
+        <field name="id_number">9007200007</field>
+        <field name="whatsapp">+970 599 100 007</field>
         <field name="email">hala.awad@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -63,6 +79,9 @@
         <field name="name">مازن فؤاد بندك</field>
         <field name="city">بيت جالا</field>
         <field name="phone">+970 599 100 008</field>
+        <field name="id_number">9008200008</field>
+        <field name="responsible_person">خالد بندك</field>
+        <field name="whatsapp">+970 599 100 008</field>
         <field name="email">mazen.bandak@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -70,6 +89,8 @@
         <field name="name">ليلى عادل زبون</field>
         <field name="city">بيت ساحور</field>
         <field name="phone">+970 599 100 009</field>
+        <field name="id_number">9009200009</field>
+        <field name="whatsapp">+970 599 100 009</field>
         <field name="email">laila.zaboun@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -77,6 +98,8 @@
         <field name="name">طارق حسن اللحام</field>
         <field name="city">الولجة</field>
         <field name="phone">+970 599 100 010</field>
+        <field name="id_number">9010200010</field>
+        <field name="whatsapp">+970 599 100 010</field>
         <field name="email">tareq.lahham@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -84,6 +107,9 @@
         <field name="name">دينا وليد صباح</field>
         <field name="city">بيت لحم</field>
         <field name="phone">+970 599 100 011</field>
+        <field name="id_number">9011200011</field>
+        <field name="responsible_person">رنا الحرباوي</field>
+        <field name="whatsapp">+970 599 100 011</field>
         <field name="email">dina.sabbah@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -91,6 +117,8 @@
         <field name="name">نادر عيسى قطان</field>
         <field name="city">بيت جالا</field>
         <field name="phone">+970 599 100 012</field>
+        <field name="id_number">9012200012</field>
+        <field name="whatsapp">+970 599 100 012</field>
         <field name="email">nader.qattan@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -98,6 +126,8 @@
         <field name="name">سلوى ماهر جقمان</field>
         <field name="city">بيت لحم</field>
         <field name="phone">+970 599 100 013</field>
+        <field name="id_number">9013200013</field>
+        <field name="whatsapp">+970 599 100 013</field>
         <field name="email">salwa.jacaman@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -105,6 +135,8 @@
         <field name="name">رائد سليم الأعرج</field>
         <field name="city">الخضر</field>
         <field name="phone">+970 599 100 014</field>
+        <field name="id_number">9014200014</field>
+        <field name="whatsapp">+970 599 100 014</field>
         <field name="email">raed.araj@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -112,6 +144,8 @@
         <field name="name">إيمان بشارة حنا</field>
         <field name="city">بيت ساحور</field>
         <field name="phone">+970 599 100 015</field>
+        <field name="id_number">9015200015</field>
+        <field name="whatsapp">+970 599 100 015</field>
         <field name="email">iman.hanna@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -119,6 +153,9 @@
         <field name="name">فادي جمال الزغير</field>
         <field name="city">الولجة</field>
         <field name="phone">+970 599 100 016</field>
+        <field name="id_number">9016200016</field>
+        <field name="responsible_person">فادي الزغير</field>
+        <field name="whatsapp">+970 599 100 016</field>
         <field name="email">fadi.zughayyar@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -126,6 +163,8 @@
         <field name="name">نور محمد صلاح</field>
         <field name="city">بيت لحم</field>
         <field name="phone">+970 599 100 017</field>
+        <field name="id_number">9017200017</field>
+        <field name="whatsapp">+970 599 100 017</field>
         <field name="email">nour.salah@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -133,6 +172,8 @@
         <field name="name">بسام أنطون مرقص</field>
         <field name="city">بيت جالا</field>
         <field name="phone">+970 599 100 018</field>
+        <field name="id_number">9018200018</field>
+        <field name="whatsapp">+970 599 100 018</field>
         <field name="email">bassam.marcus@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -140,6 +181,8 @@
         <field name="name">آية رامي الطويل</field>
         <field name="city">بيت لحم</field>
         <field name="phone">+970 599 100 019</field>
+        <field name="id_number">9019200019</field>
+        <field name="whatsapp">+970 599 100 019</field>
         <field name="email">aya.taweel@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
@@ -147,6 +190,9 @@
         <field name="name">عائلة أبو سرور — مناسبات</field>
         <field name="city">الولجة</field>
         <field name="phone">+970 599 100 020</field>
+        <field name="id_number">9020200020</field>
+        <field name="responsible_person">إياد أبو سرور</field>
+        <field name="whatsapp">+970 599 100 020</field>
         <field name="email">abusrour.events@example.com</field>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
