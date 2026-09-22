@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- One user per PRD §17 role, so the permission matrix can be verified from a real session.
+         No passwords are set: a user with no password cannot log in until an administrator sets
+         one from Settings ▸ Users ▸ (user) ▸ Action ▸ Change Password. Automated tests use
+         with_user() and need no password. Never verify a permission as admin — uid 1 bypasses
+         ACLs entirely (spec §11). -->
+
+    <record id="user_clerk" model="res.users">
+        <field name="name">سناء — موظفة حجوزات (Demo Clerk)</field>
+        <field name="login">ss_clerk</field>
+        <field name="group_ids" eval="[(6, 0, [
+            ref('seven_stars_rental.group_ss_clerk'),
+            ref('base.group_user'),
+        ])]"/>
+    </record>
+
+    <record id="user_accountant" model="res.users">
+        <field name="name">رامي — محاسب (Demo Accountant)</field>
+        <field name="login">ss_accountant</field>
+        <field name="group_ids" eval="[(6, 0, [
+            ref('seven_stars_rental.group_ss_accountant'),
+            ref('base.group_user'),
+        ])]"/>
+    </record>
+
+    <record id="user_booking_manager" model="res.users">
+        <field name="name">خالد — مسؤول الحجوزات (Demo Booking Manager)</field>
+        <field name="login">ss_booking_manager</field>
+        <field name="group_ids" eval="[(6, 0, [
+            ref('seven_stars_rental.group_ss_booking_manager'),
+            ref('base.group_user'),
+        ])]"/>
+    </record>
+
+    <record id="user_manager" model="res.users">
+        <field name="name">سيدة الإدارة (Demo Management)</field>
+        <field name="login">ss_manager</field>
+        <field name="group_ids" eval="[(6, 0, [
+            ref('seven_stars_rental.group_ss_manager'),
+            ref('base.group_user'),
+        ])]"/>
+    </record>
+
+</odoo>

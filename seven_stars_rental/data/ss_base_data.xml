@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The shekel is the operating currency. base.ILS ships with active=False. -->
+    <record id="base.ILS" model="res.currency">
+        <field name="active" eval="True"/>
+    </record>
+
+    <!-- Arabic (ar_001, direction Right-to-Left). Reports take their direction straight from
+         res.lang.direction, so this — not rtlcss — is what makes the eight documents print RTL
+         (spec §10, runtime T13). action_unarchive() also loads the standard translations. -->
+    <!-- The method is not @api.model, so convert.py consumes the first eval argument as the
+         recordset ids (odoo/tools/convert.py:195) — hence the empty list before the code. -->
+    <function model="res.lang" name="_activate_and_install_lang" eval="([], 'ar_001')"/>
+
+</odoo>

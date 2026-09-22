@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_groups_privilege_seven_stars" model="res.groups.privilege">
+        <field name="name">Seven Stars Halls</field>
+        <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+
+    <!-- PRD §17 roles. Spec §11.
+         The four groups ship in Phase 0 because Phase 2's CON-03 branches on group_ss_manager;
+         the record rules, field groups= and button guards are added on top in Phase 5. -->
+
+    <record id="group_ss_clerk" model="res.groups">
+        <field name="name">Booking Clerk</field>
+        <field name="sequence">10</field>
+        <field name="comment">Creates and edits bookings, records payments.</field>
+        <field name="implied_ids" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        <field name="privilege_id" ref="res_groups_privilege_seven_stars"/>
+    </record>
+
+    <record id="group_ss_accountant" model="res.groups">
+        <field name="name">Accountant</field>
+        <field name="sequence">20</field>
+        <field name="comment">Payments and payment reports.</field>
+        <field name="implied_ids" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        <field name="privilege_id" ref="res_groups_privilege_seven_stars"/>
+    </record>
+
+    <record id="group_ss_booking_manager" model="res.groups">
+        <field name="name">Booking Manager</field>
+        <field name="sequence">30</field>
+        <field name="comment">All bookings, cancellation and rescheduling.</field>
+        <field name="implied_ids" eval="[
+            (4, ref('seven_stars_rental.group_ss_clerk')),
+            (4, ref('sales_team.group_sale_salesman_all_leads')),
+        ]"/>
+        <field name="privilege_id" ref="res_groups_privilege_seven_stars"/>
+    </record>
+
+    <record id="group_ss_manager" model="res.groups">
+        <field name="name">Management</field>
+        <field name="sequence">40</field>
+        <field name="comment">Approves prices and discounts above the ceiling, closes bookings, and
+            may confirm a booking whose required deposit has not been received (CON-03, spec §6.1).</field>
+        <field name="implied_ids" eval="[
+            (4, ref('seven_stars_rental.group_ss_booking_manager')),
+            (4, ref('sales_team.group_sale_manager')),
+        ]"/>
+        <field name="privilege_id" ref="res_groups_privilege_seven_stars"/>
+    </record>
+
+</odoo>

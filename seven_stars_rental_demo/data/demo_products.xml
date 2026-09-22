@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_category_hall" model="product.category">
+        <field name="name">قاعات سفن ستارز</field>
+    </record>
+    <record id="product_category_service" model="product.category">
+        <field name="name">خدمات المناسبات</field>
+    </record>
+
+    <!-- ================================================================
+         THE FOUR HALLS — rental service products, one per PHYSICAL hall.
+         One product per hall is what lets CON-01 key on the hall, the schedule
+         gantt group by hall, and the capacity check sum over halls (spec §1.4).
+
+         taxes_id is deliberately EMPTY on every hall and service. outstanding_amount
+         derives from amount_total, so a default sales tax would silently make the
+         balance, the receipts and the contracts disagree with the agreed price
+         (spec §3.6, runtime T32).
+
+         hall_capacity / prep_time / cleanup_time arrive in Phase 1 with the fields.
+         ================================================================ -->
+
+    <record id="hall_1" model="product.template">
+        <field name="name">قاعة 1 — الغداء (Hall 1 · Lunch)</field>
+        <field name="default_code">SS-HALL-1</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_hall"/>
+        <field name="rent_ok" eval="True"/>
+        <field name="sale_ok" eval="True"/>
+        <field name="list_price" eval="2500.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="hall_2" model="product.template">
+        <field name="name">قاعة 2 — الغداء (Hall 2 · Lunch)</field>
+        <field name="default_code">SS-HALL-2</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_hall"/>
+        <field name="rent_ok" eval="True"/>
+        <field name="sale_ok" eval="True"/>
+        <field name="list_price" eval="2500.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="hall_3" model="product.template">
+        <field name="name">قاعة 3 — الرجال (Hall 3 · Wedding Men)</field>
+        <field name="default_code">SS-HALL-3</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_hall"/>
+        <field name="rent_ok" eval="True"/>
+        <field name="sale_ok" eval="True"/>
+        <field name="list_price" eval="14000.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="hall_4" model="product.template">
+        <field name="name">قاعة 4 — النساء (Hall 4 · Wedding Women)</field>
+        <field name="default_code">SS-HALL-4</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_hall"/>
+        <field name="rent_ok" eval="True"/>
+        <field name="sale_ok" eval="True"/>
+        <field name="list_price" eval="14000.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+
+    <!-- Standalone rate per hall: a product.pricing row with NO pricelist applies wherever a
+         pricelist does not carry its own row. Rented alone, hall 4 costs 14000 — the 0.00 row
+         belongs to the wedding-pair pricelists only (spec §3.5, runtime T31). -->
+    <record id="pricing_hall_1_standalone" model="product.pricing">
+        <field name="product_template_id" ref="hall_1"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2500.0"/>
+    </record>
+    <record id="pricing_hall_2_standalone" model="product.pricing">
+        <field name="product_template_id" ref="hall_2"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2500.0"/>
+    </record>
+    <record id="pricing_hall_3_standalone" model="product.pricing">
+        <field name="product_template_id" ref="hall_3"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="14000.0"/>
+    </record>
+    <record id="pricing_hall_4_standalone" model="product.pricing">
+        <field name="product_template_id" ref="hall_4"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="14000.0"/>
+    </record>
+
+    <!-- ================================================================
+         OPTIONAL SERVICES — ordinary non-rental sale lines. They add on top of the
+         hall price and are never multiplied by it (runtime T29).
+         ================================================================ -->
+
+    <record id="service_001" model="product.template">
+        <field name="name">استوديو تصوير فوتوغرافي</field>
+        <field name="default_code">SS-SRV-001</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="1500.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_002" model="product.template">
+        <field name="name">فرقة دبكة (قاعة النساء)</field>
+        <field name="default_code">SS-SRV-002</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="1200.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_003" model="product.template">
+        <field name="name">فرقة زفة للعريس</field>
+        <field name="default_code">SS-SRV-003</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="1000.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_004" model="product.template">
+        <field name="name">نظام إنارة متقدم</field>
+        <field name="default_code">SS-SRV-004</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="800.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_005" model="product.template">
+        <field name="name">عرض برومو على الشاشات</field>
+        <field name="default_code">SS-SRV-005</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="500.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_006" model="product.template">
+        <field name="name">ضيافة إضافية — قاعة الرجال</field>
+        <field name="default_code">SS-SRV-006</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="2000.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_007" model="product.template">
+        <field name="name">ضيافة إضافية — قاعة النساء</field>
+        <field name="default_code">SS-SRV-007</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="2000.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_008" model="product.template">
+        <field name="name">توزيعات للضيوف</field>
+        <field name="default_code">SS-SRV-008</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="700.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_009" model="product.template">
+        <field name="name">أمن إضافي للقاعة</field>
+        <field name="default_code">SS-SRV-009</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="600.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_010" model="product.template">
+        <field name="name">تنسيق زهور وديكور الطاولات</field>
+        <field name="default_code">SS-SRV-010</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="900.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+
+    <!-- ================================================================
+         PACKAGES — one agreed price; the components are listed on the booking as
+         note lines (display_type='line_note'), which keeps the order total exact.
+         Odoo 19's Combo type is NOT used: its semantics are "pick one per group",
+         so a nine-service fixed package would need nine groups with meaningless
+         split prices, and a rental product cannot be a combo at all (spec Appendix A §14).
+         ================================================================ -->
+
+    <record id="package_001" model="product.template">
+        <field name="name">بكج زفاف قياسي (9 خدمات)</field>
+        <field name="default_code">SS-PKG-001</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="14000.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="package_002" model="product.template">
+        <field name="name">بكج حنة</field>
+        <field name="default_code">SS-PKG-002</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="4500.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="package_003" model="product.template">
+        <field name="name">بكج غداء</field>
+        <field name="default_code">SS-PKG-003</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="3500.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The operating company, so the eight printed documents carry a real letterhead.
+         The company currency is deliberately NOT changed here: every demo pricelist is in ILS,
+         which is what drives sale.order.currency_id. Switching res.company.currency_id is a
+         one-off configuration step on a live database, not demo data. -->
+    <record id="base.main_company" model="res.company">
+        <field name="name">قاعات سفن ستارز — Seven Stars Halls</field>
+        <field name="street">الولجة</field>
+        <field name="city">بيت لحم</field>
+        <field name="phone">+970 2 000 0000</field>
+        <field name="email">info@sevenstars.example</field>
+    </record>
+
+</odoo>

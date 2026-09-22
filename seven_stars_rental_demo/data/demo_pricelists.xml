@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         PRICELISTS. Rental lines bypass pricelist ITEMS entirely (spec §3.3), so seasonal
+         and segment pricing is expressed as product.pricing rows keyed on
+         pricelist_id + product_template_id + recurrence_id. This is standard
+         sale_renting master data — there is no custom pricing engine anywhere.
+
+         A pricelist with no row of its own for a hall falls back to that hall's
+         standalone row in demo_products.xml. The standard pricelist therefore carries
+         no rows: its prices ARE the standalone ones.
+
+         All amounts are in ILS, which is what drives sale.order.currency_id.
+         ================================================================ -->
+
+    <record id="pricelist_standard" model="product.pricelist">
+        <field name="name">سفن ستارز — التسعيرة القياسية</field>
+        <field name="currency_id" ref="base.ILS"/>
+        <field name="sequence">1</field>
+    </record>
+
+    <!-- Off-season, one hall at a time. -->
+    <record id="pricelist_winter" model="product.pricelist">
+        <field name="name">سفن ستارز — الموسم الشتوي</field>
+        <field name="currency_id" ref="base.ILS"/>
+        <field name="sequence">2</field>
+    </record>
+    <record id="pricing_winter_hall_1" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_winter"/>
+        <field name="product_template_id" ref="hall_1"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2200.0"/>
+    </record>
+    <record id="pricing_winter_hall_2" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_winter"/>
+        <field name="product_template_id" ref="hall_2"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2200.0"/>
+    </record>
+    <record id="pricing_winter_hall_3" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_winter"/>
+        <field name="product_template_id" ref="hall_3"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="12000.0"/>
+    </record>
+    <record id="pricing_winter_hall_4" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_winter"/>
+        <field name="product_template_id" ref="hall_4"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="12000.0"/>
+    </record>
+
+    <!-- Sunday to Thursday, one hall at a time. -->
+    <record id="pricelist_midweek" model="product.pricelist">
+        <field name="name">سفن ستارز — أيام منتصف الأسبوع</field>
+        <field name="currency_id" ref="base.ILS"/>
+        <field name="sequence">3</field>
+    </record>
+    <record id="pricing_midweek_hall_1" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_midweek"/>
+        <field name="product_template_id" ref="hall_1"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2000.0"/>
+    </record>
+    <record id="pricing_midweek_hall_2" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_midweek"/>
+        <field name="product_template_id" ref="hall_2"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2000.0"/>
+    </record>
+    <record id="pricing_midweek_hall_3" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_midweek"/>
+        <field name="product_template_id" ref="hall_3"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="11000.0"/>
+    </record>
+    <record id="pricing_midweek_hall_4" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_midweek"/>
+        <field name="product_template_id" ref="hall_4"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="11000.0"/>
+    </record>
+
+    <!-- ================================================================
+         THE WEDDING PAIR. A wedding books halls 3 AND 4 for 14,000 TOTAL — never 28,000.
+         The booking carries one rental line per hall, so both halls are real for CON-01,
+         for the schedule gantt and for the 600+550 = 1150 capacity check. The single
+         combined price is carried here as master data: the full price on hall 3, 0.00
+         on hall 4.
+
+         Because the price is DERIVED, the standard "Update Prices" button reproduces it.
+         A hand-typed zero on the hall 4 line does not survive that button — it forces a
+         recomputation with force_price_recomputation=True, which ignores the manual-price
+         guard and restores 28,000 (spec §3.5, runtime T24/T25/T26).
+
+         ⚠ The 0.00 row belongs to these two pricelists ONLY. Putting it on the general
+         winter, midweek or segment pricelists would make the women's hall free whenever it
+         is rented alone (runtime T31).
+         ================================================================ -->
+
+    <record id="pricelist_wedding_pair" model="product.pricelist">
+        <field name="name">سفن ستارز — زفاف (قاعتا 3 + 4 معاً)</field>
+        <field name="currency_id" ref="base.ILS"/>
+        <field name="sequence">4</field>
+    </record>
+    <record id="pricing_wedding_pair_hall_3" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="product_template_id" ref="hall_3"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="14000.0"/>
+    </record>
+    <record id="pricing_wedding_pair_hall_4" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_wedding_pair"/>
+        <field name="product_template_id" ref="hall_4"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="0.0"/>
+    </record>
+
+    <record id="pricelist_wedding_pair_winter" model="product.pricelist">
+        <field name="name">سفن ستارز — زفاف شتوي (قاعتا 3 + 4 معاً)</field>
+        <field name="currency_id" ref="base.ILS"/>
+        <field name="sequence">5</field>
+    </record>
+    <record id="pricing_wedding_pair_winter_hall_3" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_wedding_pair_winter"/>
+        <field name="product_template_id" ref="hall_3"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="12000.0"/>
+    </record>
+    <record id="pricing_wedding_pair_winter_hall_4" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_wedding_pair_winter"/>
+        <field name="product_template_id" ref="hall_4"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="0.0"/>
+    </record>
+
+    <!-- ================================================================
+         CUSTOMER SEGMENTS (spec §23.3 G4). Ordinary pricelists — every hall carries its
+         own real price, including hall 4.
+         ================================================================ -->
+
+    <record id="pricelist_segment_locals" model="product.pricelist">
+        <field name="name">سفن ستارز — أهل البلد</field>
+        <field name="currency_id" ref="base.ILS"/>
+        <field name="sequence">6</field>
+    </record>
+    <record id="pricing_locals_hall_1" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="product_template_id" ref="hall_1"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2300.0"/>
+    </record>
+    <record id="pricing_locals_hall_2" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="product_template_id" ref="hall_2"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2300.0"/>
+    </record>
+    <record id="pricing_locals_hall_3" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="product_template_id" ref="hall_3"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="13000.0"/>
+    </record>
+    <record id="pricing_locals_hall_4" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_segment_locals"/>
+        <field name="product_template_id" ref="hall_4"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="13000.0"/>
+    </record>
+
+    <record id="pricelist_segment_family" model="product.pricelist">
+        <field name="name">سفن ستارز — عائلة المالك</field>
+        <field name="currency_id" ref="base.ILS"/>
+        <field name="sequence">7</field>
+    </record>
+    <record id="pricing_family_hall_1" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="product_template_id" ref="hall_1"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2000.0"/>
+    </record>
+    <record id="pricing_family_hall_2" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="product_template_id" ref="hall_2"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="2000.0"/>
+    </record>
+    <record id="pricing_family_hall_3" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="product_template_id" ref="hall_3"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="11000.0"/>
+    </record>
+    <record id="pricing_family_hall_4" model="product.pricing">
+        <field name="pricelist_id" ref="pricelist_segment_family"/>
+        <field name="product_template_id" ref="hall_4"/>
+        <field name="recurrence_id" ref="sale_renting.recurrence_daily"/>
+        <field name="price" eval="11000.0"/>
+    </record>
+
+</odoo>
