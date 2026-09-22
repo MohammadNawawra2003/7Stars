@@ -32,7 +32,9 @@ class SaleOrderLine(models.Model):
         """
         guarded = {'price_unit', 'discount'} & set(vals)
         if guarded and not self._ss_is_management():
-            rental_lines = self.filtered(lambda line: line.order_id.is_rental_order)
+            # hall bookings only: this is a Seven Stars rule, not a rule about
+            # every rental order that might ever exist in the database.
+            rental_lines = self.filtered(lambda line: line.order_id._ss_is_hall_booking())
             if rental_lines:
                 raise ValidationError(self.env._(
                     "تغيير السعر أو منح الخصم من صلاحية الإدارة فقط (القسم 17).\n"
@@ -50,7 +52,7 @@ class SaleOrderLine(models.Model):
         # env.user is the honest question, and reading a groups= field is safe because the
         # constraint already runs elevated.
         for line in self:
-            if not line.order_id.is_rental_order or line.discount <= MAX_DISCOUNT_PERCENT:
+            if not line.order_id._ss_is_hall_booking() or line.discount <= MAX_DISCOUNT_PERCENT:
                 continue
             # Only management can reach a non-zero discount at all (see write() above), so
             # this ceiling is the limit on MANAGEMENT's own manual discount: 5% freely, more

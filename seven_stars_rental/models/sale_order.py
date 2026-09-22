@@ -85,9 +85,15 @@ class SaleOrder(models.Model):
         string="المبلغ المتبقي", compute='_compute_ss_amounts', store=True)
     price_approved = fields.Boolean(
         string="اعتماد السعر", tracking=True,
-        groups='seven_stars_rental.group_ss_manager',
-        help="PRD §8/§17. A Python groups= is the only field-level restriction Odoo honours "
-             "(spec §3.4) — ir.model.fields.groups is dead.")
+        help="PRD §8/§17. Management approves the price; once approved, a discount above "
+             "the ceiling is allowed.\n\n"
+             "⚠ This field deliberately carries NO Python groups=. A field-level ACL here "
+             "reaches every sale.order in the database, and anything that reads all fields "
+             "as a plain salesman then fails: adding it broke NINE standard `sale` tests "
+             "with AccessError on price_approved. The clerk is kept away from it by the "
+             "view, which hides the widget, and by _ss_check_management_only_write(), which "
+             "is what actually stops the write over RPC. Reading a boolean flag is harmless; "
+             "setting it is the part that matters.")
 
     # ------------------------------------------------ the operational appendix (§10)
     # Fifteen fields, in the order of the paper form. A fixed, non-repeating set, so they
@@ -122,9 +128,23 @@ class SaleOrder(models.Model):
 
         A wedding holds TWO of them — hall 3 and hall 4 — on one order, which is what lets
         every hall be protected, scheduled and counted separately (spec §3.5).
+
+        A HALL is a rental product that has a capacity. That is what makes these rules apply
+        to Seven Stars' four halls and to nothing else: an ordinary rental product is not
+        exclusive — Odoo Rental will happily rent two of the same projector at once — so
+        applying an availability constraint to every rental line would be wrong, and was.
+        Measured: before this scoping, CON-01 refused a standard sale_renting test booking
+        for a "Projector" and broke two upstream tests.
         """
         self.ensure_one()
-        return self.order_line.filtered(lambda line: line.is_rental and line.product_id).product_id
+        rental_lines = self.order_line.filtered(lambda line: line.is_rental and line.product_id)
+        return rental_lines.product_id.filtered(
+            lambda product: product.product_tmpl_id.hall_capacity > 0)
+
+    def _ss_is_hall_booking(self):
+        """True for a Seven Stars hall booking, false for any other rental order."""
+        self.ensure_one()
+        return bool(self.is_rental_order and self._ss_hall_products())
 
     def _ss_envelope(self, hall, extra=timedelta()):
         """The window this booking really occupies the hall for: the event plus the hall's
@@ -536,17 +556,6 @@ class SaleOrder(models.Model):
     )
     SS_SIGNED_STATES = ('confirmed', 'ready', 'completed')
 
-    # A view cannot call has_group(), so the answer is exposed as a computed helper. It is
-    # not stored and not part of the field inventory of spec §7 — it carries no business
-    # data, it only lets the form show a field readonly for the right people.
-    ss_is_management = fields.Boolean(
-        string="Management session", compute='_compute_ss_is_management')
-
-    def _compute_ss_is_management(self):
-        is_management = self.env.user.has_group('seven_stars_rental.group_ss_manager')
-        for order in self:
-            order.ss_is_management = is_management
-
     def _ss_is_management(self):
         return self.env.user.has_group('seven_stars_rental.group_ss_manager')
 
@@ -559,6 +568,10 @@ class SaleOrder(models.Model):
         """
         if self._ss_is_management():
             return
+        if 'price_approved' in vals:
+            raise ValidationError(self.env._(
+                "اعتماد السعر من صلاحية الإدارة فقط (القسم 17).\n\n"
+                "Approving a price is reserved to management (PRD §17)."))
         if 'required_deposit_amount' in vals:
             raise ValidationError(self.env._(
                 "تحديد قيمة العربون المطلوب من صلاحية الإدارة فقط (القسم 17).\n\n"
@@ -567,7 +580,7 @@ class SaleOrder(models.Model):
         if not touched:
             return
         signed = self.filtered(
-            lambda o: o.is_rental_order and o.booking_state in self.SS_SIGNED_STATES)
+            lambda o: o._ss_is_hall_booking() and o.booking_state in self.SS_SIGNED_STATES)
         if signed:
             raise ValidationError(self.env._(
                 "لا يمكن تعديل حجز بعد توقيع العقد إلا بصلاحية الإدارة (القسم 17).\n"

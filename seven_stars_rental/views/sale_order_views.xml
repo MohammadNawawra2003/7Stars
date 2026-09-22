@@ -74,13 +74,16 @@
                 <page string="الدفعات" name="ss_payments" invisible="not is_rental_order">
                     <group>
                         <group string="شروط الدفع">
-                            <!-- readonly for everyone but management. This is a courtesy so
-                                 the restriction is visible; sale.order.write() is what
-                                 actually enforces it over RPC (PRD §17). -->
+                            <!-- The same field twice, so the restriction is VISIBLE without
+                                 costing a field: management edits it, everyone else reads
+                                 it. This is a courtesy — sale.order.write() is what actually
+                                 enforces it over RPC (PRD §17). -->
                             <field name="required_deposit_amount"
-                                   readonly="not ss_is_management"/>
-                            <field name="price_approved"/>
-                            <field name="ss_is_management" invisible="1"/>
+                                   groups="seven_stars_rental.group_ss_manager"/>
+                            <field name="required_deposit_amount" readonly="1"
+                                   groups="!seven_stars_rental.group_ss_manager"/>
+                            <field name="price_approved"
+                                   groups="seven_stars_rental.group_ss_manager"/>
                         </group>
                         <group string="الحساب">
                             <field name="amount_total" string="الإجمالي" readonly="1"/>
