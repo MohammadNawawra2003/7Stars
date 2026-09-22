@@ -40,6 +40,7 @@ class TestBookingLifecycle(SevenStarsCommon):
         self.assertEqual(order.state, 'sale',
                          "confirming the booking confirms the standard order too")
 
+        order.appendix_event_date = order.rental_start_date.date()
         order.action_mark_ready()
         self.assertEqual(order.booking_state, 'ready')
 
@@ -67,6 +68,7 @@ class TestBookingLifecycle(SevenStarsCommon):
         as late for ever."""
         order = self._paid_booking(29)
         order.action_confirm_booking()
+        order.appendix_event_date = order.rental_start_date.date()
         order.action_mark_ready()
         order.action_close_booking()
 
@@ -75,6 +77,21 @@ class TestBookingLifecycle(SevenStarsCommon):
             self.assertEqual(line.qty_returned, line.product_uom_qty)
         self.assertEqual(order.rental_status, 'returned')
         self.assertFalse(order.is_late)
+
+    def test_marking_ready_is_refused_until_the_appendix_is_started(self):
+        """BTN-04's guard (spec §9.1). Only the appendix's anchor field is enforced: the
+        client never said which of the fifteen items make it "complete", and guessing would
+        block real work."""
+        order = self._paid_booking(30)
+        order.action_confirm_booking()
+        self.assertFalse(order.appendix_event_date)
+        with self.assertRaises(ValidationError):
+            order.action_mark_ready()
+        self.assertEqual(order.booking_state, 'confirmed')
+
+        order.appendix_event_date = order.rental_start_date.date()
+        order.action_mark_ready()
+        self.assertEqual(order.booking_state, 'ready')
 
     # --------------------------------------------------------------- cancellation
     def test_a_booking_manager_may_cancel(self):

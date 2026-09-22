@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- RPT-01 / RPT-02 / RPT-03 share ONE base layout with a variant block (spec §10).
+
+     Every document forces lang='ar_001'. Report HTML takes its direction straight from
+     res.lang.direction (web/views/report_templates.xml:29, :83, :270), so this — and not
+     rtlcss, which governs the backend UI bundle only — is what makes these print
+     right-to-left. Verified at runtime (T13).
+
+     ⚠ THE LEGAL TEXT IS CUSTOMER-OWNED. Appendix A of the specification records it as
+     «الشايب / النص من سفن ستارز»: Al Shayeb builds the document, Seven Stars supplies the
+     wording. The clause block below is a clearly marked placeholder — no legal language has
+     been invented. Replace the contents of ss_contract_terms, and nothing else needs to
+     change. -->
+
+<template id="report_contract_terms_placeholder">
+    <div class="mt-4 p-3" style="border:1px dashed #999;">
+        <p class="mb-1"><strong>الشروط والأحكام</strong></p>
+        <p class="mb-0 text-muted">
+            [ نص الشروط والأحكام الخاص بقاعات سفن ستارز يوضع هنا.
+            هذا النص مملوك للعميل ولم تتم صياغته من طرفنا. ]
+        </p>
+        <p class="mb-0 text-muted">
+            [ Seven Stars Halls' own contract wording goes here. This text is
+            customer-owned and has deliberately not been drafted for them. ]
+        </p>
+    </div>
+</template>
+
+<!-- Signature blocks. The medium of signature was never specified (PRD §22 item 17); the
+     agreed approach is printed lines signed on paper, exactly as Seven Stars does today,
+     which keeps depends = ['sale_renting'] at a single entry. -->
+<template id="report_contract_signatures">
+    <div class="row mt-5">
+        <div class="col-6">
+            <p class="mb-5"><strong>الطرف الأول — قاعات سفن ستارز</strong></p>
+            <p>الاسم: ................................................</p>
+            <p>التوقيع: ..............................................</p>
+            <p>التاريخ: ..............................................</p>
+        </div>
+        <div class="col-6">
+            <p class="mb-5"><strong>الطرف الثاني — العميل</strong></p>
+            <p>الاسم: <span t-field="doc.partner_id.name"/></p>
+            <p>التوقيع: ..............................................</p>
+            <p>التاريخ: ..............................................</p>
+        </div>
+    </div>
+</template>
+
+<!-- The shared base. `contract_title` and `variant` are supplied by each caller. -->
+<template id="report_contract_base">
+    <t t-call="web.external_layout">
+        <div class="page">
+            <h2 class="text-center" t-out="contract_title"/>
+            <p class="text-center text-muted" t-field="doc.name"/>
+
+            <table class="table table-sm mt-4">
+                <tr>
+                    <td style="width:25%"><strong>العميل</strong></td>
+                    <td><span t-field="doc.partner_id.name"/></td>
+                    <td style="width:25%"><strong>رقم الهوية</strong></td>
+                    <td><span t-field="doc.partner_id.id_number"/></td>
+                </tr>
+                <tr>
+                    <td><strong>الهاتف</strong></td>
+                    <td><span t-field="doc.partner_id.phone"/></td>
+                    <td><strong>واتساب</strong></td>
+                    <td><span t-field="doc.partner_id.whatsapp"/></td>
+                </tr>
+                <tr>
+                    <td><strong>الشخص المسؤول</strong></td>
+                    <td><span t-field="doc.partner_id.responsible_person"/></td>
+                    <td><strong>نوع المناسبة</strong></td>
+                    <td><span t-field="doc.event_type"/></td>
+                </tr>
+                <tr>
+                    <td><strong>من</strong></td>
+                    <td><span t-field="doc.rental_start_date"/></td>
+                    <td><strong>إلى</strong></td>
+                    <td><span t-field="doc.rental_return_date"/></td>
+                </tr>
+                <tr>
+                    <td><strong>عدد المعازيم</strong></td>
+                    <td><span t-out="doc.guest_count"/></td>
+                    <td><strong>السعة الإجمالية للقاعات</strong></td>
+                    <td><span t-out="sum(line.product_id.product_tmpl_id.hall_capacity
+                                   for line in doc.order_line.filtered('is_rental'))"/></td>
+                </tr>
+            </table>
+
+            <!-- The halls and services. A wedding shows TWO hall rows, hall 3 and hall 4,
+                 and the pair price sits on one of them — the total below is the agreed
+                 14,000, never 28,000 (spec §3.5). -->
+            <table class="table table-sm mt-3">
+                <thead>
+                    <tr>
+                        <th>البند</th>
+                        <th class="text-center">الكمية</th>
+                        <th class="text-end">السعر</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="doc.order_line" t-as="line">
+                        <t t-if="line.display_type == 'line_note'">
+                            <td colspan="3" class="ps-4 text-muted"><span t-field="line.name"/></td>
+                        </t>
+                        <t t-elif="not line.display_type">
+                            <td><span t-field="line.name"/></td>
+                            <td class="text-center"><span t-out="int(line.product_uom_qty)"/></td>
+                            <td class="text-end">
+                                <span t-field="line.price_subtotal"
+                                      t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                            </td>
+                        </t>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-sm w-50 ms-auto">
+                <tr>
+                    <td><strong>الإجمالي المتفق عليه</strong></td>
+                    <td class="text-end">
+                        <span t-field="doc.amount_total"
+                              t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>العربون المطلوب</td>
+                    <td class="text-end">
+                        <span t-field="doc.required_deposit_amount"
+                              t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>المدفوع حتى تاريخه</td>
+                    <td class="text-end">
+                        <span t-field="doc.collected_amount"
+                              t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>المتبقي</strong></td>
+                    <td class="text-end">
+                        <span t-field="doc.outstanding_amount"
+                              t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- the per-contract variant block -->
+            <t t-out="0"/>
+
+            <t t-call="seven_stars_rental.report_contract_terms_placeholder"/>
+            <t t-call="seven_stars_rental.report_contract_signatures"/>
+        </div>
+    </t>
+</template>
+
+<!-- RPT-01 · عقد استئجار القاعة (زفاف) -->
+<template id="report_hall_contract_document">
+<t t-set="contract_title" t-value="'عقد استئجار القاعة — زفاف'"/>
+        <t t-call="seven_stars_rental.report_contract_base">
+            <div class="mt-3">
+                <p><strong>ملاحظات قاعة الرجال:</strong> <span t-field="doc.internal_note_men"/></p>
+                <p><strong>ملاحظات قاعة النساء:</strong> <span t-field="doc.internal_note_women"/></p>
+                <p class="text-muted">يُرفق بهذا العقد «الملحق التشغيلي ليوم المناسبة».</p>
+            </div>
+        </t>
+</template>
+
+<template id="report_hall_contract">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29). Setting it on the record instead has
+         no effect on direction, and t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_hall_contract_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+<!-- RPT-02 · عقد حنة -->
+<template id="report_henna_contract_document">
+<t t-set="contract_title" t-value="'عقد استئجار قاعة — حنة'"/>
+        <t t-call="seven_stars_rental.report_contract_base">
+            <div class="mt-3">
+                <p><strong>ملاحظات:</strong> <span t-field="doc.internal_note_women"/></p>
+            </div>
+        </t>
+</template>
+
+<template id="report_henna_contract">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29). Setting it on the record instead has
+         no effect on direction, and t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_henna_contract_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+<!-- RPT-03 · عقد خدمات غداء -->
+<template id="report_lunch_contract_document">
+<t t-set="contract_title" t-value="'عقد خدمات غداء'"/>
+        <t t-call="seven_stars_rental.report_contract_base">
+            <div class="mt-3">
+                <p><strong>ملاحظات:</strong> <span t-field="doc.internal_note_men"/></p>
+            </div>
+        </t>
+</template>
+
+<template id="report_lunch_contract">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29). Setting it on the record instead has
+         no effect on direction, and t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_lunch_contract_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+</odoo>

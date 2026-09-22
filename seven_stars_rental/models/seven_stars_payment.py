@@ -31,8 +31,6 @@ class SevenStarsPayment(models.Model):
         string="طريقة الدفع", required=True, default='cash')
     reference = fields.Char(string="المرجع / رقم الإيصال")
 
-    partner_id = fields.Many2one(related='order_id.partner_id', string="العميل", store=True)
-
     def _compute_display_name(self):
         for payment in self:
             payment.display_name = f"{payment.order_id.name or ''} — {payment.amount:,.2f}"

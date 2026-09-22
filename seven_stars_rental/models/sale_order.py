@@ -76,6 +76,26 @@ class SaleOrder(models.Model):
         help="PRD §8/§17. A Python groups= is the only field-level restriction Odoo honours "
              "(spec §3.4) — ir.model.fields.groups is dead.")
 
+    # ------------------------------------------------ the operational appendix (§10)
+    # Fifteen fields, in the order of the paper form. A fixed, non-repeating set, so they
+    # are fields rather than a child model (spec §22). PRD §10 lists fifteen items; an
+    # earlier audit miscounted fourteen.
+    appendix_event_date = fields.Date(string="تاريخ المناسبة")
+    appendix_promo_show = fields.Boolean(string="عرض برومو")
+    appendix_dabke_women = fields.Boolean(string="فرقة دبكة (النساء)")
+    appendix_zaffa_groom = fields.Boolean(string="فرقة زفة للعريس")
+    appendix_zaffa_on_screens = fields.Boolean(string="عرض الزفة على الشاشات")
+    appendix_lighting = fields.Char(string="نظام الإنارة")
+    appendix_hospitality_men = fields.Char(string="ضيافة قاعة الرجال")
+    appendix_hospitality_women = fields.Char(string="ضيافة قاعة النساء")
+    appendix_hospitality_time = fields.Char(string="موعد تنزيل الضيافة")
+    appendix_giveaways = fields.Char(string="التوزيعات")
+    appendix_tables_groom = fields.Char(string="حجز طاولات أهل العريس")
+    appendix_tables_bride = fields.Char(string="حجز طاولات أهل العروس")
+    appendix_security = fields.Char(string="أمن القاعة")
+    appendix_photo_studio = fields.Char(string="استوديو التصوير")
+    appendix_details = fields.Text(string="التفاصيل")
+
     @api.depends('payment_ids.amount', 'amount_total')
     def _compute_ss_amounts(self):
         for order in self:
@@ -245,8 +265,22 @@ class SaleOrder(models.Model):
         return True
 
     def action_mark_ready(self):
-        """BTN-04 — جاهز للمناسبة. Phase 3 adds the operational-appendix guard."""
-        self.booking_state = 'ready'
+        """BTN-04 — جاهز للمناسبة, guarded by the operational appendix (spec §9.1).
+
+        The guard is deliberately the weakest defensible one: the appendix must have been
+        STARTED, which means its own anchor field — the event date — is filled in. The client
+        never defined which of the fifteen items must be present for the appendix to count as
+        complete, and enforcing all fifteen would block real work on a guess. Recorded as an
+        open client question; tightening it later is a one-line change here.
+        """
+        for order in self:
+            if not order.appendix_event_date:
+                raise ValidationError(self.env._(
+                    "لا يمكن تعليم الحجز «جاهز للمناسبة» قبل تعبئة الملحق التشغيلي.\n"
+                    "ابدأ بتعبئة «تاريخ المناسبة» في تبويب «الملحق التشغيلي».\n\n"
+                    "The operational appendix has not been started: fill in the event date "
+                    "on the Operational Appendix tab first (spec §10, RPT-04)."))
+            order.booking_state = 'ready'
         return True
 
     def action_postpone(self):

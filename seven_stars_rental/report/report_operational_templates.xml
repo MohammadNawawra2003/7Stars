@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- RPT-04 · الملحق التشغيلي ليوم المناسبة — the fifteen items in the order of the paper
+     form, so the printed sheet matches what the staff already use. -->
+<template id="report_operational_appendix_document">
+<t t-call="web.external_layout">
+            <div class="page">
+                <h2 class="text-center">الملحق التشغيلي ليوم المناسبة</h2>
+                <p class="text-center text-muted">
+                    <span t-field="doc.name"/> — <span t-field="doc.partner_id.name"/>
+                </p>
+
+                <table class="table table-sm table-bordered mt-4">
+                    <tr><td style="width:40%"><strong>تاريخ المناسبة</strong></td>
+                        <td><span t-field="doc.appendix_event_date"/></td></tr>
+                    <tr><td><strong>عرض برومو</strong></td>
+                        <td><span t-if="doc.appendix_promo_show">نعم</span><span t-else="">لا</span></td></tr>
+                    <tr><td><strong>فرقة دبكة (النساء)</strong></td>
+                        <td><span t-if="doc.appendix_dabke_women">نعم</span><span t-else="">لا</span></td></tr>
+                    <tr><td><strong>فرقة زفة للعريس</strong></td>
+                        <td><span t-if="doc.appendix_zaffa_groom">نعم</span><span t-else="">لا</span></td></tr>
+                    <tr><td><strong>عرض الزفة على الشاشات</strong></td>
+                        <td><span t-if="doc.appendix_zaffa_on_screens">نعم</span><span t-else="">لا</span></td></tr>
+                    <tr><td><strong>نظام الإنارة</strong></td>
+                        <td><span t-field="doc.appendix_lighting"/></td></tr>
+                    <tr><td><strong>ضيافة قاعة الرجال</strong></td>
+                        <td><span t-field="doc.appendix_hospitality_men"/></td></tr>
+                    <tr><td><strong>ضيافة قاعة النساء</strong></td>
+                        <td><span t-field="doc.appendix_hospitality_women"/></td></tr>
+                    <tr><td><strong>موعد تنزيل الضيافة</strong></td>
+                        <td><span t-field="doc.appendix_hospitality_time"/></td></tr>
+                    <tr><td><strong>التوزيعات</strong></td>
+                        <td><span t-field="doc.appendix_giveaways"/></td></tr>
+                    <tr><td><strong>حجز طاولات أهل العريس</strong></td>
+                        <td><span t-field="doc.appendix_tables_groom"/></td></tr>
+                    <tr><td><strong>حجز طاولات أهل العروس</strong></td>
+                        <td><span t-field="doc.appendix_tables_bride"/></td></tr>
+                    <tr><td><strong>أمن القاعة</strong></td>
+                        <td><span t-field="doc.appendix_security"/></td></tr>
+                    <tr><td><strong>استوديو التصوير</strong></td>
+                        <td><span t-field="doc.appendix_photo_studio"/></td></tr>
+                    <tr><td><strong>التفاصيل</strong></td>
+                        <td><span t-field="doc.appendix_details"/></td></tr>
+                </table>
+
+                <t t-call="seven_stars_rental.report_contract_signatures"/>
+            </div>
+        </t>
+</template>
+
+<template id="report_operational_appendix">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29). Setting it on the record instead has
+         no effect on direction, and t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_operational_appendix_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+<!-- RPT-08 · تفاصيل المناسبة للموظفين — the operational sheet the staff carry on the day.
+     No prices: this one is for the floor, not the customer. -->
+<template id="report_event_details_document">
+<t t-call="web.external_layout">
+            <div class="page">
+                <h2 class="text-center">تفاصيل المناسبة — نسخة الموظفين</h2>
+
+                <table class="table table-sm mt-4">
+                    <tr>
+                        <td style="width:25%"><strong>الحجز</strong></td><td><span t-field="doc.name"/></td>
+                        <td style="width:25%"><strong>نوع المناسبة</strong></td><td><span t-field="doc.event_type"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>العميل</strong></td><td><span t-field="doc.partner_id.name"/></td>
+                        <td><strong>الهاتف</strong></td><td><span t-field="doc.partner_id.phone"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>الشخص المسؤول</strong></td>
+                        <td><span t-field="doc.partner_id.responsible_person"/></td>
+                        <td><strong>عدد المعازيم</strong></td><td><span t-out="doc.guest_count"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>من</strong></td><td><span t-field="doc.rental_start_date"/></td>
+                        <td><strong>إلى</strong></td><td><span t-field="doc.rental_return_date"/></td>
+                    </tr>
+                </table>
+
+                <h4 class="mt-4">القاعات وأوقات التجهيز والتنظيف</h4>
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th>القاعة</th><th>السعة</th>
+                            <th>بداية التجهيز</th><th>نهاية التنظيف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="doc.order_line.filtered('is_rental')" t-as="line">
+                            <td><span t-field="line.product_id.name"/></td>
+                            <td><span t-out="line.product_id.product_tmpl_id.hall_capacity"/></td>
+                            <td><span t-out="doc._ss_envelope(line.product_id)[0]"/></td>
+                            <td><span t-out="doc._ss_envelope(line.product_id)[1]"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 class="mt-4">الخدمات المطلوبة</h4>
+                <ul>
+                    <li t-foreach="doc.order_line.filtered(lambda l: not l.is_rental and not l.display_type)"
+                        t-as="line">
+                        <span t-field="line.name"/>
+                    </li>
+                </ul>
+
+                <h4 class="mt-4">ملاحظات داخلية</h4>
+                <p><strong>قاعة الرجال:</strong> <span t-field="doc.internal_note_men"/></p>
+                <p><strong>قاعة النساء:</strong> <span t-field="doc.internal_note_women"/></p>
+                <p><strong>الملحق:</strong> <span t-field="doc.appendix_details"/></p>
+            </div>
+        </t>
+</template>
+
+<template id="report_event_details">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29). Setting it on the record instead has
+         no effect on direction, and t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_event_details_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+</odoo>

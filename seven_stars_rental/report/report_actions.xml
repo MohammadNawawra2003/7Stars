@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- The eight documents of PRD §10-§16 (spec §10). All qweb-pdf, all A4 via
+     base.paperformat_euro, all rendered through web.external_layout.
+
+     ir.actions.report restricts visibility with group_ids — ir.rule uses `groups`, which is
+     a different name for the same kind of m2m. -->
+
+<record id="action_report_hall_contract" model="ir.actions.report">
+    <field name="name">عقد استئجار القاعة (زفاف)</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_hall_contract</field>
+    <field name="report_file">seven_stars_rental.report_hall_contract</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'عقد زفاف - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+
+<record id="action_report_henna_contract" model="ir.actions.report">
+    <field name="name">عقد حنة</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_henna_contract</field>
+    <field name="report_file">seven_stars_rental.report_henna_contract</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'عقد حنة - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+
+<record id="action_report_lunch_contract" model="ir.actions.report">
+    <field name="name">عقد خدمات غداء</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_lunch_contract</field>
+    <field name="report_file">seven_stars_rental.report_lunch_contract</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'عقد غداء - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+
+<record id="action_report_operational_appendix" model="ir.actions.report">
+    <field name="name">الملحق التشغيلي</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_operational_appendix</field>
+    <field name="report_file">seven_stars_rental.report_operational_appendix</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'الملحق التشغيلي - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+
+<record id="action_report_booking_confirmation" model="ir.actions.report">
+    <field name="name">تأكيد الحجز</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_booking_confirmation</field>
+    <field name="report_file">seven_stars_rental.report_booking_confirmation</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'تأكيد حجز - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+
+<record id="action_report_payment_statement" model="ir.actions.report">
+    <field name="name">كشف الدفعات</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_payment_statement</field>
+    <field name="report_file">seven_stars_rental.report_payment_statement</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'كشف دفعات - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+
+<!-- Bound to the PAYMENT, because a receipt is for one payment. -->
+<record id="action_report_payment_receipt" model="ir.actions.report">
+    <field name="name">إيصال الدفع</field>
+    <field name="model">seven.stars.payment</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_payment_receipt</field>
+    <field name="report_file">seven_stars_rental.report_payment_receipt</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'ايصال دفع - %s' % (object.order_id.name)</field>
+    <field name="binding_model_id" ref="model_seven_stars_payment"/>
+    <field name="binding_type">report</field>
+</record>
+
+<record id="action_report_event_details" model="ir.actions.report">
+    <field name="name">تفاصيل المناسبة للموظفين</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_event_details</field>
+    <field name="report_file">seven_stars_rental.report_event_details</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'تفاصيل المناسبة - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+
+</odoo>

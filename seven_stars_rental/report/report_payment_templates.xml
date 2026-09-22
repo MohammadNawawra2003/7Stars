@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- RPT-05 · تأكيد الحجز -->
+<template id="report_booking_confirmation_document">
+<t t-call="web.external_layout">
+            <div class="page">
+                <h2 class="text-center">تأكيد حجز</h2>
+                <p class="text-center text-muted" t-field="doc.name"/>
+
+                <p class="mt-4">
+                    نؤكد حجز <strong><span t-field="doc.partner_id.name"/></strong>
+                    للمناسبة الموضحة أدناه في قاعات سفن ستارز.
+                </p>
+
+                <table class="table table-sm mt-3">
+                    <tr><td style="width:30%"><strong>نوع المناسبة</strong></td>
+                        <td><span t-field="doc.event_type"/></td></tr>
+                    <tr><td><strong>من</strong></td><td><span t-field="doc.rental_start_date"/></td></tr>
+                    <tr><td><strong>إلى</strong></td><td><span t-field="doc.rental_return_date"/></td></tr>
+                    <tr><td><strong>القاعات</strong></td>
+                        <td><span t-out="', '.join(doc.order_line.filtered('is_rental').product_id.mapped('name'))"/></td></tr>
+                    <tr><td><strong>عدد المعازيم</strong></td><td><span t-out="doc.guest_count"/></td></tr>
+                    <tr><td><strong>حالة الحجز</strong></td><td><span t-field="doc.booking_state"/></td></tr>
+                    <tr><td><strong>الإجمالي</strong></td>
+                        <td><span t-field="doc.amount_total"
+                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                    <tr><td><strong>المتبقي</strong></td>
+                        <td><span t-field="doc.outstanding_amount"
+                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                </table>
+
+                <t t-call="seven_stars_rental.report_contract_signatures"/>
+            </div>
+        </t>
+</template>
+
+<template id="report_booking_confirmation">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29). Setting it on the record instead has
+         no effect on direction, and t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_booking_confirmation_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+<!-- RPT-06 · كشف الدفعات — one line per payment row, which is why the payment history is a
+     model and not a set of fields (spec §6). -->
+<template id="report_payment_statement_document">
+<t t-call="web.external_layout">
+            <div class="page">
+                <h2 class="text-center">كشف الدفعات</h2>
+                <p class="text-center text-muted">
+                    <span t-field="doc.name"/> — <span t-field="doc.partner_id.name"/>
+                </p>
+
+                <table class="table table-sm table-bordered mt-4">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th><th>طريقة الدفع</th>
+                            <th>المرجع</th><th class="text-end">المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="doc.payment_ids.sorted('date')" t-as="payment">
+                            <td><span t-field="payment.date"/></td>
+                            <td><span t-field="payment.method"/></td>
+                            <td><span t-field="payment.reference"/></td>
+                            <td class="text-end">
+                                <span t-field="payment.amount"
+                                      t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                            </td>
+                        </tr>
+                        <tr t-if="not doc.payment_ids">
+                            <td colspan="4" class="text-center text-muted">
+                                لم تُسجَّل أي دفعة حتى الآن.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="table table-sm w-50 ms-auto">
+                    <tr><td><strong>الإجمالي</strong></td>
+                        <td class="text-end"><span t-field="doc.amount_total"
+                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                    <tr><td>العربون المطلوب</td>
+                        <td class="text-end"><span t-field="doc.required_deposit_amount"
+                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                    <tr><td><strong>المدفوع</strong></td>
+                        <td class="text-end"><span t-field="doc.collected_amount"
+                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                    <tr><td><strong>المتبقي</strong></td>
+                        <td class="text-end"><span t-field="doc.outstanding_amount"
+                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                </table>
+            </div>
+        </t>
+</template>
+
+<template id="report_payment_statement">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29). Setting it on the record instead has
+         no effect on direction, and t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_payment_statement_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+<!-- RPT-07 · إيصال الدفع — one receipt for ONE payment, so this report is bound to
+     seven.stars.payment. Printing it from the booking would produce every receipt at once,
+     which is not what a receipt is. -->
+<template id="report_payment_receipt_document">
+<t t-call="web.external_layout">
+            <div class="page">
+                <h2 class="text-center">إيصال دفع</h2>
+
+                <table class="table table-sm mt-4">
+                    <tr><td style="width:30%"><strong>الحجز</strong></td>
+                        <td><span t-field="doc.order_id.name"/></td></tr>
+                    <tr><td><strong>العميل</strong></td>
+                        <td><span t-field="doc.order_id.partner_id.name"/></td></tr>
+                    <tr><td><strong>التاريخ</strong></td><td><span t-field="doc.date"/></td></tr>
+                    <tr><td><strong>طريقة الدفع</strong></td><td><span t-field="doc.method"/></td></tr>
+                    <tr><td><strong>المرجع</strong></td><td><span t-field="doc.reference"/></td></tr>
+                    <tr><td><strong>المبلغ المستلم</strong></td>
+                        <td><h4><span t-field="doc.amount"
+                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></h4></td></tr>
+                </table>
+
+                <table class="table table-sm w-50 ms-auto mt-4">
+                    <tr><td>إجمالي الحجز</td>
+                        <td class="text-end"><span t-field="doc.order_id.amount_total"
+                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                    <tr><td>إجمالي المدفوع</td>
+                        <td class="text-end"><span t-field="doc.order_id.collected_amount"
+                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                    <tr><td><strong>المتبقي</strong></td>
+                        <td class="text-end"><span t-field="doc.order_id.outstanding_amount"
+                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
+                </table>
+
+                <div class="row mt-5">
+                    <div class="col-6">
+                        <p>استلم — الاسم: ..............................</p>
+                        <p>التوقيع: ..............................</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+</template>
+
+<template id="report_payment_receipt">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29). Setting it on the record instead has
+         no effect on direction, and t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_payment_receipt_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+</odoo>

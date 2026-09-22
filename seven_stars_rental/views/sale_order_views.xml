@@ -95,6 +95,38 @@
                         </list>
                     </field>
                 </page>
+
+                <!-- The operational appendix, in the order of the paper form (RPT-04). -->
+                <page string="الملحق التشغيلي" name="ss_appendix" invisible="not is_rental_order">
+                    <group>
+                        <group string="المناسبة والعروض">
+                            <field name="appendix_event_date"/>
+                            <field name="appendix_promo_show"/>
+                            <field name="appendix_dabke_women"/>
+                            <field name="appendix_zaffa_groom"/>
+                            <field name="appendix_zaffa_on_screens"/>
+                            <field name="appendix_lighting"/>
+                        </group>
+                        <group string="الضيافة والتوزيعات">
+                            <field name="appendix_hospitality_men"/>
+                            <field name="appendix_hospitality_women"/>
+                            <field name="appendix_hospitality_time"/>
+                            <field name="appendix_giveaways"/>
+                        </group>
+                        <group string="الطاولات">
+                            <field name="appendix_tables_groom"/>
+                            <field name="appendix_tables_bride"/>
+                        </group>
+                        <group string="الخدمات المساندة">
+                            <field name="appendix_security"/>
+                            <field name="appendix_photo_studio"/>
+                        </group>
+                    </group>
+                    <group string="التفاصيل">
+                        <field name="appendix_details" nolabel="1"
+                               placeholder="تفاصيل إضافية ليوم المناسبة…"/>
+                    </group>
+                </page>
             </xpath>
 
         </field>

@@ -105,6 +105,7 @@ class TestPayments(SevenStarsCommon):
                               required_deposit_amount=3000.0)
         self._pay(order, 3000.0)
         order.action_confirm_booking()
+        order.appendix_event_date = order.rental_start_date.date()
         order.action_mark_ready()
         with self.assertRaises(ValidationError):
             order.action_close_booking()
@@ -115,6 +116,7 @@ class TestPayments(SevenStarsCommon):
                               required_deposit_amount=3000.0)
         self._pay(order, 3000.0)
         order.action_confirm_booking()
+        order.appendix_event_date = order.rental_start_date.date()
         order.action_mark_ready()
         self._pay(order, 11000.0)
         self.assertEqual(order.outstanding_amount, 0.0)
@@ -133,6 +135,7 @@ class TestPayments(SevenStarsCommon):
                               required_deposit_amount=3000.0)
         self._pay(order, 3000.0)
         order.action_confirm_booking()
+        order.appendix_event_date = order.rental_start_date.date()
         order.action_mark_ready()
         self._pay(order, 11000.0)
         order.action_close_booking()

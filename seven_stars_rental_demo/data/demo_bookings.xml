@@ -10,7 +10,8 @@
          tests/, never shipped as data — CON-01 would refuse them and the addon would fail
          to install, which is exactly the guarantee this file relies on.
 
-         Deposits, payments and balances arrive in Phase 2 with seven.stars.payment.
+         The nine bookings that are completed, ready or imminent carry a filled
+         operational appendix, so RPT-04 and RPT-08 print with real content.
     -->
 
     <record id="booking_001" model="sale.order">
@@ -24,6 +25,21 @@
         <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">completed</field>
         <field name="internal_note_men">زفاف مكتمل — قاعتا 3+4</field>
+        <field name="appendix_event_date">2026-05-15</field>
+        <field name="appendix_promo_show" eval="True"/>
+        <field name="appendix_dabke_women" eval="True"/>
+        <field name="appendix_zaffa_groom" eval="True"/>
+        <field name="appendix_zaffa_on_screens" eval="True"/>
+        <field name="appendix_lighting">إنارة كاملة + ليزر</field>
+        <field name="appendix_hospitality_men">قهوة عربية وتمر</field>
+        <field name="appendix_hospitality_women">عصائر وحلويات</field>
+        <field name="appendix_hospitality_time">19:30</field>
+        <field name="appendix_giveaways">توزيعات مطبوعة</field>
+        <field name="appendix_tables_groom">30 طاولة</field>
+        <field name="appendix_tables_bride">25 طاولة</field>
+        <field name="appendix_security">4 أفراد أمن</field>
+        <field name="appendix_photo_studio">استوديو النجوم</field>
+        <field name="appendix_details">زفة على الشاشات الساعة 20:00</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_3_product'),
@@ -89,6 +105,21 @@
         <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">completed</field>
         <field name="internal_note_men">زفاف مكتمل</field>
+        <field name="appendix_event_date">2026-08-14</field>
+        <field name="appendix_promo_show" eval="True"/>
+        <field name="appendix_dabke_women" eval="True"/>
+        <field name="appendix_zaffa_groom" eval="True"/>
+        <field name="appendix_zaffa_on_screens" eval="False"/>
+        <field name="appendix_lighting">إنارة كاملة</field>
+        <field name="appendix_hospitality_men">قهوة وتمر</field>
+        <field name="appendix_hospitality_women">عصائر</field>
+        <field name="appendix_hospitality_time">20:00</field>
+        <field name="appendix_giveaways">شوكولاتة</field>
+        <field name="appendix_tables_groom">35 طاولة</field>
+        <field name="appendix_tables_bride">30 طاولة</field>
+        <field name="appendix_security">4 أفراد أمن</field>
+        <field name="appendix_photo_studio">استوديو الأمل</field>
+        <field name="appendix_details">—</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_3_product'),
@@ -114,6 +145,21 @@
         <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">completed</field>
         <field name="internal_note_men">حنة في قاعة النساء وحدها — تسعيرة قياسية</field>
+        <field name="appendix_event_date">2026-09-04</field>
+        <field name="appendix_promo_show" eval="False"/>
+        <field name="appendix_dabke_women" eval="True"/>
+        <field name="appendix_zaffa_groom" eval="False"/>
+        <field name="appendix_zaffa_on_screens" eval="False"/>
+        <field name="appendix_lighting">إنارة هادئة</field>
+        <field name="appendix_hospitality_men">—</field>
+        <field name="appendix_hospitality_women">ضيافة كاملة</field>
+        <field name="appendix_hospitality_time">19:00</field>
+        <field name="appendix_giveaways">توزيعات حنة</field>
+        <field name="appendix_tables_groom">—</field>
+        <field name="appendix_tables_bride">20 طاولة</field>
+        <field name="appendix_security">فردان</field>
+        <field name="appendix_photo_studio">—</field>
+        <field name="appendix_details">حنة — قاعة النساء فقط</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_4_product'),
@@ -174,6 +220,21 @@
         <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">ready</field>
         <field name="internal_note_men">زفاف جاهز للمناسبة</field>
+        <field name="appendix_event_date">2026-09-25</field>
+        <field name="appendix_promo_show" eval="True"/>
+        <field name="appendix_dabke_women" eval="True"/>
+        <field name="appendix_zaffa_groom" eval="True"/>
+        <field name="appendix_zaffa_on_screens" eval="True"/>
+        <field name="appendix_lighting">إنارة كاملة</field>
+        <field name="appendix_hospitality_men">قهوة عربية وتمر</field>
+        <field name="appendix_hospitality_women">عصائر وحلويات</field>
+        <field name="appendix_hospitality_time">19:30</field>
+        <field name="appendix_giveaways">توزيعات مطبوعة</field>
+        <field name="appendix_tables_groom">32 طاولة</field>
+        <field name="appendix_tables_bride">28 طاولة</field>
+        <field name="appendix_security">4 أفراد أمن</field>
+        <field name="appendix_photo_studio">استوديو النجوم</field>
+        <field name="appendix_details">جاهز — تم تأكيد كل البنود</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_3_product'),
@@ -199,6 +260,21 @@
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">ready</field>
         <field name="internal_note_men">غداء جاهز</field>
+        <field name="appendix_event_date">2026-09-26</field>
+        <field name="appendix_promo_show" eval="False"/>
+        <field name="appendix_dabke_women" eval="False"/>
+        <field name="appendix_zaffa_groom" eval="False"/>
+        <field name="appendix_zaffa_on_screens" eval="False"/>
+        <field name="appendix_lighting">إنارة عادية</field>
+        <field name="appendix_hospitality_men">غداء كامل</field>
+        <field name="appendix_hospitality_women">—</field>
+        <field name="appendix_hospitality_time">13:00</field>
+        <field name="appendix_giveaways">—</field>
+        <field name="appendix_tables_groom">20 طاولة</field>
+        <field name="appendix_tables_bride">—</field>
+        <field name="appendix_security">فردان</field>
+        <field name="appendix_photo_studio">—</field>
+        <field name="appendix_details">غداء عائلي</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_1_product'),
@@ -219,6 +295,21 @@
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">ready</field>
         <field name="internal_note_men">حفل توجيهي جاهز</field>
+        <field name="appendix_event_date">2026-09-27</field>
+        <field name="appendix_promo_show" eval="True"/>
+        <field name="appendix_dabke_women" eval="False"/>
+        <field name="appendix_zaffa_groom" eval="False"/>
+        <field name="appendix_zaffa_on_screens" eval="True"/>
+        <field name="appendix_lighting">إنارة كاملة</field>
+        <field name="appendix_hospitality_men">ضيافة خفيفة</field>
+        <field name="appendix_hospitality_women">ضيافة خفيفة</field>
+        <field name="appendix_hospitality_time">19:00</field>
+        <field name="appendix_giveaways">شهادات تكريم</field>
+        <field name="appendix_tables_groom">—</field>
+        <field name="appendix_tables_bride">—</field>
+        <field name="appendix_security">3 أفراد أمن</field>
+        <field name="appendix_photo_studio">استوديو الفجر</field>
+        <field name="appendix_details">حفل توجيهي</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_2_product'),
@@ -239,6 +330,21 @@
         <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">زفاف مؤكد</field>
+        <field name="appendix_event_date">2026-10-09</field>
+        <field name="appendix_promo_show" eval="True"/>
+        <field name="appendix_dabke_women" eval="True"/>
+        <field name="appendix_zaffa_groom" eval="True"/>
+        <field name="appendix_zaffa_on_screens" eval="True"/>
+        <field name="appendix_lighting">إنارة كاملة</field>
+        <field name="appendix_hospitality_men">قهوة وتمر</field>
+        <field name="appendix_hospitality_women">عصائر</field>
+        <field name="appendix_hospitality_time">19:30</field>
+        <field name="appendix_giveaways">توزيعات</field>
+        <field name="appendix_tables_groom">28 طاولة</field>
+        <field name="appendix_tables_bride">26 طاولة</field>
+        <field name="appendix_security">4 أفراد أمن</field>
+        <field name="appendix_photo_studio">استوديو النجوم</field>
+        <field name="appendix_details">—</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_3_product'),
@@ -284,6 +390,21 @@
         <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">زفاف مؤكد</field>
+        <field name="appendix_event_date">2026-10-16</field>
+        <field name="appendix_promo_show" eval="True"/>
+        <field name="appendix_dabke_women" eval="True"/>
+        <field name="appendix_zaffa_groom" eval="True"/>
+        <field name="appendix_zaffa_on_screens" eval="False"/>
+        <field name="appendix_lighting">إنارة كاملة</field>
+        <field name="appendix_hospitality_men">قهوة وتمر</field>
+        <field name="appendix_hospitality_women">عصائر وحلويات</field>
+        <field name="appendix_hospitality_time">20:00</field>
+        <field name="appendix_giveaways">توزيعات</field>
+        <field name="appendix_tables_groom">40 طاولة</field>
+        <field name="appendix_tables_bride">35 طاولة</field>
+        <field name="appendix_security">5 أفراد أمن</field>
+        <field name="appendix_photo_studio">استوديو الأمل</field>
+        <field name="appendix_details">عدد كبير — 950 معزوماً</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_3_product'),
@@ -349,6 +470,21 @@
         <field name="required_deposit_amount" eval="3000.0"/>
         <field name="booking_state">confirmed</field>
         <field name="internal_note_men">زفاف شتوي — تسعيرة الزوج الشتوية 12000</field>
+        <field name="appendix_event_date">2026-11-13</field>
+        <field name="appendix_promo_show" eval="False"/>
+        <field name="appendix_dabke_women" eval="True"/>
+        <field name="appendix_zaffa_groom" eval="True"/>
+        <field name="appendix_zaffa_on_screens" eval="True"/>
+        <field name="appendix_lighting">إنارة شتوية</field>
+        <field name="appendix_hospitality_men">قهوة وتمر وشوربة</field>
+        <field name="appendix_hospitality_women">مشروبات ساخنة</field>
+        <field name="appendix_hospitality_time">19:00</field>
+        <field name="appendix_giveaways">توزيعات</field>
+        <field name="appendix_tables_groom">25 طاولة</field>
+        <field name="appendix_tables_bride">22 طاولة</field>
+        <field name="appendix_security">3 أفراد أمن</field>
+        <field name="appendix_photo_studio">استوديو النجوم</field>
+        <field name="appendix_details">زفاف شتوي</field>
         <field name="order_line" eval="[
             (0, 0, {
             'product_id': ref('hall_3_product'),
