@@ -4,7 +4,12 @@
     <!-- Twenty fictional customers. The tag below is what makes demo records obvious in the UI:
          filter or group Customers by «بيانات تجريبية» to see exactly what this addon created.
          id_number, whatsapp and responsible_person are the three details the contracts
-         need and the standard contact does not carry (spec §7). -->
+         need and the standard contact does not carry (spec §7).
+
+         customer_rank is set explicitly: the standard Customers action filters on it,
+         and it is only bumped automatically when an order is CONFIRMED. Without it the
+         Customers menu looks empty and Odoo fills the screen with ghosted sample
+         records, which is a poor first impression of a populated system. -->
 
     <record id="partner_tag_demo" model="res.partner.category">
         <field name="name">بيانات تجريبية — Seven Stars Demo</field>
@@ -19,6 +24,7 @@
         <field name="responsible_person">أحمد العمري</field>
         <field name="whatsapp">+970 599 100 001</field>
         <field name="email">ahmad.omari@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_002" model="res.partner">
@@ -28,6 +34,7 @@
         <field name="id_number">9002200002</field>
         <field name="whatsapp">+970 599 100 002</field>
         <field name="email">samer.qumsieh@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_003" model="res.partner">
@@ -37,6 +44,7 @@
         <field name="id_number">9003200003</field>
         <field name="whatsapp">+970 599 100 003</field>
         <field name="email">mona.abueid@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_004" model="res.partner">
@@ -46,6 +54,7 @@
         <field name="id_number">9004200004</field>
         <field name="whatsapp">+970 599 100 004</field>
         <field name="email">yousef.shaer@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_005" model="res.partner">
@@ -55,6 +64,7 @@
         <field name="id_number">9005200005</field>
         <field name="whatsapp">+970 599 100 005</field>
         <field name="email">rana.harbawi@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_006" model="res.partner">
@@ -64,6 +74,7 @@
         <field name="id_number">9006200006</field>
         <field name="whatsapp">+970 599 100 006</field>
         <field name="email">imad.dibs@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_007" model="res.partner">
@@ -73,6 +84,7 @@
         <field name="id_number">9007200007</field>
         <field name="whatsapp">+970 599 100 007</field>
         <field name="email">hala.awad@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_008" model="res.partner">
@@ -83,6 +95,7 @@
         <field name="responsible_person">خالد بندك</field>
         <field name="whatsapp">+970 599 100 008</field>
         <field name="email">mazen.bandak@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_009" model="res.partner">
@@ -92,6 +105,7 @@
         <field name="id_number">9009200009</field>
         <field name="whatsapp">+970 599 100 009</field>
         <field name="email">laila.zaboun@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_010" model="res.partner">
@@ -101,6 +115,7 @@
         <field name="id_number">9010200010</field>
         <field name="whatsapp">+970 599 100 010</field>
         <field name="email">tareq.lahham@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_011" model="res.partner">
@@ -111,6 +126,7 @@
         <field name="responsible_person">رنا الحرباوي</field>
         <field name="whatsapp">+970 599 100 011</field>
         <field name="email">dina.sabbah@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_012" model="res.partner">
@@ -120,6 +136,7 @@
         <field name="id_number">9012200012</field>
         <field name="whatsapp">+970 599 100 012</field>
         <field name="email">nader.qattan@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_013" model="res.partner">
@@ -129,6 +146,7 @@
         <field name="id_number">9013200013</field>
         <field name="whatsapp">+970 599 100 013</field>
         <field name="email">salwa.jacaman@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_014" model="res.partner">
@@ -138,6 +156,7 @@
         <field name="id_number">9014200014</field>
         <field name="whatsapp">+970 599 100 014</field>
         <field name="email">raed.araj@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_015" model="res.partner">
@@ -147,6 +166,7 @@
         <field name="id_number">9015200015</field>
         <field name="whatsapp">+970 599 100 015</field>
         <field name="email">iman.hanna@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_016" model="res.partner">
@@ -157,6 +177,7 @@
         <field name="responsible_person">فادي الزغير</field>
         <field name="whatsapp">+970 599 100 016</field>
         <field name="email">fadi.zughayyar@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_017" model="res.partner">
@@ -166,6 +187,7 @@
         <field name="id_number">9017200017</field>
         <field name="whatsapp">+970 599 100 017</field>
         <field name="email">nour.salah@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_018" model="res.partner">
@@ -175,6 +197,7 @@
         <field name="id_number">9018200018</field>
         <field name="whatsapp">+970 599 100 018</field>
         <field name="email">bassam.marcus@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_019" model="res.partner">
@@ -184,6 +207,7 @@
         <field name="id_number">9019200019</field>
         <field name="whatsapp">+970 599 100 019</field>
         <field name="email">aya.taweel@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
     <record id="partner_customer_020" model="res.partner">
@@ -194,6 +218,7 @@
         <field name="responsible_person">إياد أبو سرور</field>
         <field name="whatsapp">+970 599 100 020</field>
         <field name="email">abusrour.events@example.com</field>
+        <field name="customer_rank" eval="1"/>
         <field name="category_id" eval="[(4, ref('partner_tag_demo'))]"/>
     </record>
 

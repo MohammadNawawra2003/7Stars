@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
+<odoo noupdate="1">
 
     <!-- Thirty-two bookings across the scenario matrix of spec §18: every one of the eight
          booking states, single-hall and multi-hall, past and future, each pricelist family,
@@ -10,16 +10,25 @@
          tests/, never shipped as data — CON-01 would refuse them and the addon would fail
          to install, which is exactly the guarantee this file relies on.
 
-         ⚠ These bookings carry `booking_state` only. The standard sale.order `state` stays
-         `draft`, so a demo booking reads «مكتمل» beside "Quotation". That is not an
-         oversight: the two fields are independent by design (spec §5, runtime T4), and
-         setting `state` here would make the dataset impossible to re-apply —
-         sale.order.write() refuses ANY write containing pricelist_id once the order is
-         confirmed, testing for the KEY rather than a changed value
-         (sale/models/sale_order.py:1042), and these records carry a pricelist. Measured: the
-         install succeeded and every subsequent `-u` then failed. An upgradable dataset is
-         worth more than the cosmetic match; confirm a booking through the buttons to see the
-         real behaviour, which tests/test_lifecycle.py covers.
+         Each booking names the member of staff responsible for it (`user_id`, the standard
+         salesperson field), which is also what the standard record rule uses: a clerk holding
+         "Own Documents Only" sees the bookings she took and no one else's.
+
+         ⚠ THIS FILE IS noupdate="1", and it is the only demo file that is.
+
+         Confirming a booking really does confirm the sale order (action_confirm_booking
+         calls action_confirm), so a demo booking left at state `draft` is not what the
+         system produces — and it shows: Rental ▸ Schedule defaults to a "Confirmed Orders"
+         filter, so an unconfirmed dataset makes the schedule look empty even though the
+         halls are all there. The demo therefore carries the real `state`.
+
+         That forces noupdate, because sale.order.write() refuses ANY write containing
+         pricelist_id once an order is confirmed — it tests for the KEY, not for a changed
+         value (sale/models/sale_order.py:1042) — and these records carry a pricelist.
+         Measured: without noupdate the install succeeded and every later `-u` failed.
+         Bookings are transactional records; rewriting them on every upgrade was never
+         wanted. The other demo files stay updatable, so editing a hall, a price or a
+         payment still re-applies with `-u`.
 
          Deposits: 5000 on the wedding halls, 1000 on the lunch halls. The client's
          «3000–5000، حسب القاعة» describes the WEDDING halls — a 3000 deposit on a 2500
@@ -37,6 +46,7 @@
 
     <record id="booking_001" model="sale.order">
         <field name="partner_id" ref="partner_customer_001"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-05-15 15:00:00</field>
@@ -45,6 +55,7 @@
         <field name="guest_count" eval="800"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">completed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">زفاف مكتمل — قاعتا 3+4</field>
         <field name="appendix_event_date">2026-05-15</field>
         <field name="appendix_promo_show" eval="True"/>
@@ -67,17 +78,22 @@
             'product_id': ref('hall_3_product'),
             'product_uom_qty': 1,
             'is_rental': True,
+            'qty_delivered': 1,
+            'qty_returned': 1,
         }),
             (0, 0, {
             'product_id': ref('hall_4_product'),
             'product_uom_qty': 1,
             'is_rental': True,
+            'qty_delivered': 1,
+            'qty_returned': 1,
         })
         ]"/>
     </record>
 
     <record id="booking_002" model="sale.order">
         <field name="partner_id" ref="partner_customer_002"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-06-12 09:00:00</field>
@@ -86,6 +102,7 @@
         <field name="guest_count" eval="350"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">completed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">غداء مكتمل</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -93,12 +110,15 @@
             'product_id': ref('hall_1_product'),
             'product_uom_qty': 1,
             'is_rental': True,
+            'qty_delivered': 1,
+            'qty_returned': 1,
         })
         ]"/>
     </record>
 
     <record id="booking_003" model="sale.order">
         <field name="partner_id" ref="partner_customer_003"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-07-03 09:00:00</field>
@@ -107,6 +127,7 @@
         <field name="guest_count" eval="300"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">completed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">غداء مكتمل</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -114,12 +135,15 @@
             'product_id': ref('hall_2_product'),
             'product_uom_qty': 1,
             'is_rental': True,
+            'qty_delivered': 1,
+            'qty_returned': 1,
         })
         ]"/>
     </record>
 
     <record id="booking_004" model="sale.order">
         <field name="partner_id" ref="partner_customer_004"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-08-14 15:00:00</field>
@@ -128,6 +152,7 @@
         <field name="guest_count" eval="900"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">completed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">زفاف مكتمل</field>
         <field name="appendix_event_date">2026-08-14</field>
         <field name="appendix_promo_show" eval="True"/>
@@ -150,17 +175,22 @@
             'product_id': ref('hall_3_product'),
             'product_uom_qty': 1,
             'is_rental': True,
+            'qty_delivered': 1,
+            'qty_returned': 1,
         }),
             (0, 0, {
             'product_id': ref('hall_4_product'),
             'product_uom_qty': 1,
             'is_rental': True,
+            'qty_delivered': 1,
+            'qty_returned': 1,
         })
         ]"/>
     </record>
 
     <record id="booking_005" model="sale.order">
         <field name="partner_id" ref="partner_customer_005"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-09-04 15:00:00</field>
@@ -169,6 +199,7 @@
         <field name="guest_count" eval="400"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">completed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">حنة في قاعة النساء وحدها — تسعيرة قياسية</field>
         <field name="appendix_event_date">2026-09-04</field>
         <field name="appendix_promo_show" eval="False"/>
@@ -191,12 +222,15 @@
             'product_id': ref('hall_4_product'),
             'product_uom_qty': 1,
             'is_rental': True,
+            'qty_delivered': 1,
+            'qty_returned': 1,
         })
         ]"/>
     </record>
 
     <record id="booking_006" model="sale.order">
         <field name="partner_id" ref="partner_customer_006"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-06-19 15:00:00</field>
@@ -205,6 +239,7 @@
         <field name="guest_count" eval="200"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">cancelled</field>
+        <field name="state">cancel</field>
         <field name="internal_note_men">خطوبة ملغاة</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -218,6 +253,7 @@
 
     <record id="booking_007" model="sale.order">
         <field name="partner_id" ref="partner_customer_007"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-11-06 15:00:00</field>
@@ -226,6 +262,7 @@
         <field name="guest_count" eval="150"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">cancelled</field>
+        <field name="state">cancel</field>
         <field name="internal_note_men">عقيقة ملغاة</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -239,6 +276,7 @@
 
     <record id="booking_008" model="sale.order">
         <field name="partner_id" ref="partner_customer_008"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-09-25 15:00:00</field>
@@ -247,6 +285,7 @@
         <field name="guest_count" eval="850"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">ready</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">زفاف جاهز للمناسبة</field>
         <field name="appendix_event_date">2026-09-25</field>
         <field name="appendix_promo_show" eval="True"/>
@@ -280,6 +319,7 @@
 
     <record id="booking_009" model="sale.order">
         <field name="partner_id" ref="partner_customer_009"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-09-26 09:00:00</field>
@@ -288,6 +328,7 @@
         <field name="guest_count" eval="380"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">ready</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">غداء جاهز</field>
         <field name="appendix_event_date">2026-09-26</field>
         <field name="appendix_promo_show" eval="False"/>
@@ -316,6 +357,7 @@
 
     <record id="booking_010" model="sale.order">
         <field name="partner_id" ref="partner_customer_010"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-09-27 15:00:00</field>
@@ -324,6 +366,7 @@
         <field name="guest_count" eval="300"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">ready</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">حفل توجيهي جاهز</field>
         <field name="appendix_event_date">2026-09-27</field>
         <field name="appendix_promo_show" eval="True"/>
@@ -352,6 +395,7 @@
 
     <record id="booking_011" model="sale.order">
         <field name="partner_id" ref="partner_customer_011"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-10-09 15:00:00</field>
@@ -360,6 +404,7 @@
         <field name="guest_count" eval="780"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">زفاف مؤكد</field>
         <field name="appendix_event_date">2026-10-09</field>
         <field name="appendix_promo_show" eval="True"/>
@@ -393,6 +438,7 @@
 
     <record id="booking_012" model="sale.order">
         <field name="partner_id" ref="partner_customer_012"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-10-09 09:00:00</field>
@@ -401,6 +447,7 @@
         <field name="guest_count" eval="300"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">غداء في اليوم نفسه — قاعة مختلفة، وهذا مسموح</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -414,6 +461,7 @@
 
     <record id="booking_013" model="sale.order">
         <field name="partner_id" ref="partner_customer_013"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-10-16 15:00:00</field>
@@ -422,6 +470,7 @@
         <field name="guest_count" eval="950"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">زفاف مؤكد</field>
         <field name="appendix_event_date">2026-10-16</field>
         <field name="appendix_promo_show" eval="True"/>
@@ -455,6 +504,7 @@
 
     <record id="booking_014" model="sale.order">
         <field name="partner_id" ref="partner_customer_014"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-10-23 09:00:00</field>
@@ -463,6 +513,7 @@
         <field name="guest_count" eval="360"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">غداء مؤكد</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -476,6 +527,7 @@
 
     <record id="booking_015" model="sale.order">
         <field name="partner_id" ref="partner_customer_015"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-10-23 15:00:00</field>
@@ -484,6 +536,7 @@
         <field name="guest_count" eval="280"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">حفل طلبة في اليوم نفسه — قاعة مختلفة</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -497,6 +550,7 @@
 
     <record id="booking_016" model="sale.order">
         <field name="partner_id" ref="partner_customer_016"/>
+        <field name="user_id" ref="user_clerk"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair_reduced"/>
         <field name="rental_start_date">2026-11-13 15:00:00</field>
@@ -505,6 +559,7 @@
         <field name="guest_count" eval="700"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">زفاف شتوي — تسعيرة الزوج الشتوية 12000</field>
         <field name="appendix_event_date">2026-11-13</field>
         <field name="appendix_promo_show" eval="False"/>
@@ -538,6 +593,7 @@
 
     <record id="booking_017" model="sale.order">
         <field name="partner_id" ref="partner_customer_017"/>
+        <field name="user_id" ref="user_booking_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2026-11-20 15:00:00</field>
@@ -546,6 +602,7 @@
         <field name="guest_count" eval="250"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">حنة مؤكدة</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -559,6 +616,7 @@
 
     <record id="booking_018" model="sale.order">
         <field name="partner_id" ref="partner_customer_018"/>
+        <field name="user_id" ref="user_booking_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair_reduced"/>
         <field name="rental_start_date">2026-12-11 15:00:00</field>
@@ -567,6 +625,7 @@
         <field name="guest_count" eval="640"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">زفاف شتوي</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -585,6 +644,7 @@
 
     <record id="booking_019" model="sale.order">
         <field name="partner_id" ref="partner_customer_019"/>
+        <field name="user_id" ref="user_booking_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair_reduced"/>
         <field name="rental_start_date">2027-01-15 15:00:00</field>
@@ -611,6 +671,7 @@
 
     <record id="booking_020" model="sale.order">
         <field name="partner_id" ref="partner_customer_020"/>
+        <field name="user_id" ref="user_booking_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2027-02-05 09:00:00</field>
@@ -632,6 +693,7 @@
 
     <record id="booking_021" model="sale.order">
         <field name="partner_id" ref="partner_customer_001"/>
+        <field name="user_id" ref="user_booking_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2027-02-19 15:00:00</field>
@@ -653,6 +715,7 @@
 
     <record id="booking_022" model="sale.order">
         <field name="partner_id" ref="partner_customer_002"/>
+        <field name="user_id" ref="user_booking_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2027-03-12 15:00:00</field>
@@ -674,6 +737,7 @@
 
     <record id="booking_023" model="sale.order">
         <field name="partner_id" ref="partner_customer_003"/>
+        <field name="user_id" ref="user_booking_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2027-04-02 15:00:00</field>
@@ -700,6 +764,7 @@
 
     <record id="booking_024" model="sale.order">
         <field name="partner_id" ref="partner_customer_004"/>
+        <field name="user_id" ref="user_booking_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2027-04-09 09:00:00</field>
@@ -721,6 +786,7 @@
 
     <record id="booking_025" model="sale.order">
         <field name="partner_id" ref="partner_customer_005"/>
+        <field name="user_id" ref="user_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2027-04-16 09:00:00</field>
@@ -742,6 +808,7 @@
 
     <record id="booking_026" model="sale.order">
         <field name="partner_id" ref="partner_customer_006"/>
+        <field name="user_id" ref="user_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2027-05-07 15:00:00</field>
@@ -768,6 +835,7 @@
 
     <record id="booking_027" model="sale.order">
         <field name="partner_id" ref="partner_customer_007"/>
+        <field name="user_id" ref="user_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2027-05-14 15:00:00</field>
@@ -794,6 +862,7 @@
 
     <record id="booking_028" model="sale.order">
         <field name="partner_id" ref="partner_customer_008"/>
+        <field name="user_id" ref="user_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2027-05-21 15:00:00</field>
@@ -815,6 +884,7 @@
 
     <record id="booking_029" model="sale.order">
         <field name="partner_id" ref="partner_customer_009"/>
+        <field name="user_id" ref="user_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_standard"/>
         <field name="rental_start_date">2027-06-04 15:00:00</field>
@@ -836,6 +906,7 @@
 
     <record id="booking_030" model="sale.order">
         <field name="partner_id" ref="partner_customer_010"/>
+        <field name="user_id" ref="user_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2027-06-11 15:00:00</field>
@@ -844,6 +915,7 @@
         <field name="guest_count" eval="820"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">postponed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">مؤجل بناءً على طلب العميل</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -862,6 +934,7 @@
 
     <record id="booking_031" model="sale.order">
         <field name="partner_id" ref="partner_customer_011"/>
+        <field name="user_id" ref="user_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_locals"/>
         <field name="rental_start_date">2027-06-18 09:00:00</field>
@@ -870,6 +943,7 @@
         <field name="guest_count" eval="370"/>
         <field name="required_deposit_amount" eval="1000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">تسعيرة أهل البلد</field>
         <field name="order_line" eval="[
             (5, 0, 0),
@@ -883,6 +957,7 @@
 
     <record id="booking_032" model="sale.order">
         <field name="partner_id" ref="partner_customer_012"/>
+        <field name="user_id" ref="user_manager"/>
         <field name="is_rental_order" eval="True"/>
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_segment_family"/>
         <field name="rental_start_date">2027-06-25 15:00:00</field>
@@ -891,6 +966,7 @@
         <field name="guest_count" eval="520"/>
         <field name="required_deposit_amount" eval="5000.0"/>
         <field name="booking_state">confirmed</field>
+        <field name="state">sale</field>
         <field name="internal_note_men">تسعيرة عائلة المالك — قاعة الرجال وحدها</field>
         <field name="order_line" eval="[
             (5, 0, 0),

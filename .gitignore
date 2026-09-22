@@ -7,3 +7,7 @@ __pycache__/
 .DS_Store
 venv/
 .env
+
+# demo recordings live outside the repository (~/seven-stars-demo)
+*.mp4
+*.webm
