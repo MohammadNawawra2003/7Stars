@@ -174,10 +174,17 @@ Root and the Odoo administrator are members of Management.
 their own documents by `sale.sale_order_personal_rule`, so half the §17 matrix comes free.
 Only the accountant gets a rule — read every booking, write none.
 
-**Field restrictions.** `price_approved` uses a Python `groups=`, the only field-level ACL
-Odoo 19 honours. `price_unit`, `discount` and `required_deposit_amount` use **write guards**
-instead, because a `groups=` is read-and-write in one and a clerk who could not read a price
-could not quote a hall.
+**Field restrictions.** `price_unit`, `discount`, `required_deposit_amount` and
+`price_approved` all use **write guards**, not a Python `groups=`. A `groups=` is
+read-and-write in one *and* it reaches every `sale.order` in the database: putting one on
+`price_approved` broke **nine standard `sale` tests** with `AccessError`, because anything
+reading all fields of any quotation as a plain salesman then fails. The clerk is kept away
+from the control by the **view** (`groups=` on the field element, which is view visibility,
+not an ACL) and from setting it by the guard.
+
+**`seven.stars.payment` is readable by every internal user**, writable only by our roles.
+`payment_ids` sits on every `sale.order`, so without that read row a plain salesperson could
+not read an ordinary quotation at all — it broke four more standard tests.
 
 **Two traps worth keeping in mind:**
 
@@ -291,6 +298,14 @@ code prefix.
 So these files sit under `data`, not `demo`: no flag needed, failures are hard errors, and
 `-u seven_stars_rental,seven_stars_rental_demo` re-applies an edit.
 
+⚠ These bookings carry `booking_state` only; the standard `state` stays `draft`, so a demo
+booking reads «مكتمل» beside "Quotation". The two fields are independent by design, and
+setting `state` here would make the dataset impossible to re-apply: `sale.order.write()`
+refuses any write containing `pricelist_id` once an order is confirmed, testing for the KEY
+rather than a changed value (`sale/models/sale_order.py:1042`), and these records carry a
+pricelist. Measured — the install succeeded and every subsequent `-u` then failed. Confirm a
+booking through the buttons to see the real lifecycle.
+
 ⚠ Every `order_line` list starts with `(5, 0, 0)`. `(0, 0, {...})` is a *create* command, so
 without the clear each upgrade appended a second copy of every hall line — measured, 220
 lines became 264 on one upgrade. A test fails if a booking ever holds the same hall twice.
@@ -355,6 +370,9 @@ files, 2 data files, 9 test files, the icon and this document. `seven_stars_rent
 | One reduced pair pricelist for winter and midweek | the client gave both the same −2000; two lists with identical numbers would be two things to keep in step |
 | `(5, 0, 0)` on every demo `order_line` | `(0, 0, …)` is a create command and these files are updatable |
 | BTN-04 requires only that the appendix has been *started* | which of the fifteen items make it "complete" was never stated; enforcing all fifteen would block real work on a guess |
+| No `groups=` on any field of `sale.order` | a field-level ACL there reaches every order in the database and broke nine standard tests |
+| `seven.stars.payment` readable by all internal users | `payment_ids` is on every `sale.order`; without it a plain salesperson cannot read a quotation |
+| Demo bookings carry no standard `state` | setting it makes the dataset impossible to re-apply, because the records carry a pricelist |
 
 ---
 
@@ -374,6 +392,14 @@ files, 2 data files, 9 test files, the icon and this document. `seven_stars_rent
 | `test_rules.py` | seasonal selection, the ceiling, summed capacity, the hall lock, the reminders |
 | `test_security.py` | the §17 matrix, each cell from a real role session |
 | `test_migration.py` | the import audit and the migration bypass |
+| `test_security.py::TestNoCollateralDamage` | a plain salesperson (no Seven Stars group) can read a whole quotation; an ordinary rental product is not treated as a hall |
+
+**Results: 128 tests, 0 failed, 0 errors** — on a clean install and again after an upgrade.
+
+**Upstream regression**, run with these addons installed:
+`-u sale,sale_renting --test-enable --test-tags /sale,/sale_renting`. This is what found both
+collateral-damage bugs above; our own tests could not have, because they are about records
+that are not ours.
 
 ---
 
@@ -392,7 +418,9 @@ files, 2 data files, 9 test files, the icon and this document. `seven_stars_rent
 - **The company currency is not changed by the addon.** Pricelists are in ILS, which is what
   drives order currency; setting `res.company.currency_id` is a one-off manual step.
 - **Booking `state` and `booking_state` are independent.** Demo bookings carry a booking state
-  without a confirmed sale order; that is by design and was verified at runtime.
+  without a confirmed sale order, so `rental_status` on them reads `draft`. Walking a booking
+  through the buttons is what exercises the real lifecycle, and `test_lifecycle.py` asserts
+  that closing sets `rental_status='returned'` and clears the Late flag.
 
 ---
 
@@ -425,6 +453,7 @@ files, 2 data files, 9 test files, the icon and this document. `seven_stars_rent
 | 4 | `24464e8` | the business rules bite |
 | 5 | `2146cb4` | roles and permissions |
 | 6 | `e2e2ac4` | historical import tooling |
+| 7 | `d66b12f` | upstream regression fixes, documentation |
 
 Branch `staging` only. `main`, `stage` and `dev` were never touched, and nothing was
 force-pushed.

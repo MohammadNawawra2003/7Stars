@@ -238,3 +238,59 @@ class TestPermissionMatrix(SevenStarsCommon):
         manager_order.with_user(self.clerk).action_await_deposit()
         manager_order.with_user(self.manager).action_confirm_booking()
         self.assertEqual(manager_order.booking_state, 'confirmed')
+
+
+@tagged('post_install', '-at_install')
+class TestNoCollateralDamage(SevenStarsCommon):
+    """This addon adds fields and a model to sale.order, which EVERY Odoo user touches.
+    Both regressions below were found by running the standard `sale` and `sale_renting`
+    suites with this addon installed — our own tests could not have caught them, because
+    they are about records that are not ours.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.plain_user = cls.env['res.users'].create({
+            'name': "Plain salesperson", 'login': 'test_plain_salesperson',
+            'group_ids': [Command.set([
+                cls.env.ref('base.group_user').id,
+                cls.env.ref('sales_team.group_sale_salesman').id,
+            ])],
+        })
+        cls.product = cls._service("PLAIN Service", 1000.0)
+
+    def test_a_plain_salesperson_can_read_a_whole_quotation(self):
+        """`payment_ids` points at seven.stars.payment, and it sits on EVERY sale.order.
+        Without a read ACL for internal users, reading all fields of any quotation raised
+        AccessError and broke four standard `sale` tests."""
+        quotation = self.env['sale.order'].with_user(self.plain_user).create({
+            'partner_id': self.customer.id,
+            'order_line': [Command.create({
+                'product_id': self.product.product_variant_id.id, 'product_uom_qty': 1})],
+        })
+        self.assertTrue(quotation.read(), "a plain salesperson must be able to read an order")
+
+    def test_a_plain_salesperson_cannot_record_a_payment(self):
+        """Read access is not write access."""
+        booking = self._booking(
+            [self._hall("PLAIN Hall", 400, 2500.0).product_variant_id],
+            *self.evening(2039, 5, 6))
+        with self.assertRaises(AccessError):
+            self.env['seven.stars.payment'].with_user(self.plain_user).create({
+                'order_id': booking.id, 'amount': 100.0})
+
+    def test_an_ordinary_rental_product_is_not_treated_as_a_hall(self):
+        """A hall is a rental product WITH A CAPACITY. Ordinary rental products are not
+        exclusive — Odoo Rental will rent two of the same projector at once — and keying the
+        availability rule on "is a rental line" refused a standard sale_renting booking for a
+        Projector and broke two upstream tests."""
+        projector = self.env['product.template'].create({
+            'name': "PLAIN Projector", 'type': 'service', 'rent_ok': True, 'sale_ok': True,
+            'list_price': 50.0, 'taxes_id': [Command.clear()]})
+        self.assertEqual(projector.hall_capacity, 0)
+
+        first = self._booking([projector.product_variant_id], *self.evening(2039, 6, 3))
+        second = self._booking([projector.product_variant_id], *self.evening(2039, 6, 3))
+        self.assertTrue(second.id, "two projectors may be rented at the same time")
+        self.assertFalse(first._ss_is_hall_booking())
