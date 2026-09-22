@@ -16,11 +16,13 @@
         'views/product_template_views.xml',
         'views/res_partner_views.xml',
         'views/res_config_settings_views.xml',
+        'views/seven_stars_payment_views.xml',
         'report/report_contract_templates.xml',
         'report/report_operational_templates.xml',
         'report/report_payment_templates.xml',
         'report/report_actions.xml',
+        'views/seven_stars_menus.xml',        # menus last, per Odoo convention
     ],
     'installable': True,
-    'application': False,           # extends the Rental app, it is not a new app
+    'application': True,            # one app carrying the whole booking workflow
 }

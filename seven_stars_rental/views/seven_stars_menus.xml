@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- ONE app for the whole workflow.
+
+     Everything here is a menu or an action over views that already exist. No new model, no
+     new field, no business logic: an enquiry, its halls, its money, its documents and its
+     master data are simply reachable from one place, in the order the work actually happens,
+     instead of the staff hopping between the Rental app, the product screens and the
+     settings.
+
+     Menus load last, per Odoo convention, because every action they point at must exist. -->
+
+    <!-- ============================================================ actions -->
+
+    <record id="action_ss_bookings" model="ir.actions.act_window">
+        <field name="name">الحجوزات</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,kanban,form,calendar</field>
+        <field name="domain">[('is_rental_order', '=', True)]</field>
+        <!-- in_rental_app is what makes a new record a rental order: is_rental_order
+             defaults from it (sale_renting/models/sale_order.py:98). -->
+        <field name="context">{'in_rental_app': True, 'default_is_rental_order': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_button">أنشئ أول حجز</p>
+            <p>كل حجز يمر بالمسار نفسه: مسودة ← حجز مبدئي ← انتظار العربون وتوقيع العقد ←
+               مؤكد ← جاهز للمناسبة ← مكتمل.</p>
+        </field>
+    </record>
+
+    <record id="action_ss_customers" model="ir.actions.act_window">
+        <field name="name">العملاء</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('customer_rank', '>', 0)]</field>
+        <field name="context">{'default_customer_rank': 1}</field>
+    </record>
+
+    <record id="action_ss_payments" model="ir.actions.act_window">
+        <field name="name">الدفعات</field>
+        <field name="res_model">seven.stars.payment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_seven_stars_payment_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_button">لا توجد دفعات بعد</p>
+            <p>كل مبلغ يصل يُسجَّل هنا وفي مكان واحد فقط. المبالغ المدفوعة والمتبقية على
+               الحجز محسوبة من هذه السطور.</p>
+        </field>
+    </record>
+
+    <!-- Halls are rental products WITH a capacity; that is what makes the availability,
+         capacity and pricing rules apply to them and to nothing else. -->
+    <record id="action_ss_halls" model="ir.actions.act_window">
+        <field name="name">القاعات</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('rent_ok', '=', True), ('hall_capacity', '>', 0)]</field>
+        <field name="context">{'in_rental_app': True, 'default_rent_ok': True,
+                               'default_type': 'service', 'default_hall_capacity': 1}</field>
+    </record>
+
+    <record id="action_ss_services" model="ir.actions.act_window">
+        <field name="name">الخدمات والبكجات</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('sale_ok', '=', True), ('hall_capacity', '=', 0)]</field>
+        <field name="context">{'default_type': 'service', 'default_sale_ok': True}</field>
+    </record>
+
+    <record id="action_ss_pricelists" model="ir.actions.act_window">
+        <field name="name">قوائم الأسعار</field>
+        <field name="res_model">product.pricelist</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>أسعار القاعات تُدار من تبويب «أسعار الإيجار» داخل القاعة نفسها، لكل قائمة أسعار.</p>
+            <p>⚠ قائمتا «زفاف» تحملان سعر القاعتين 3+4 معاً: السعر الكامل على قاعة الرجال
+               و0.00 على قاعة النساء. هذا الصفر يخص هاتين القائمتين فقط.</p>
+        </field>
+    </record>
+
+    <!-- ============================================================== menus -->
+
+    <menuitem id="menu_ss_root"
+              name="قاعات سفن ستارز"
+              web_icon="seven_stars_rental,static/description/icon.png"
+              groups="seven_stars_rental.group_ss_clerk,seven_stars_rental.group_ss_accountant"
+              sequence="15"/>
+
+    <!-- 1 · the booking itself -->
+    <menuitem id="menu_ss_bookings_root" name="الحجوزات" parent="menu_ss_root" sequence="10"/>
+    <menuitem id="menu_ss_bookings" name="الحجوزات" parent="menu_ss_bookings_root"
+              action="action_ss_bookings" sequence="10"/>
+    <menuitem id="menu_ss_schedule" name="جدول المناسبات" parent="menu_ss_bookings_root"
+              action="sale_renting.action_rental_order_schedule" sequence="20"/>
+    <menuitem id="menu_ss_customers" name="العملاء" parent="menu_ss_bookings_root"
+              action="action_ss_customers" sequence="30"/>
+
+    <!-- 2 · the money -->
+    <menuitem id="menu_ss_money_root" name="الدفعات" parent="menu_ss_root" sequence="20"/>
+    <menuitem id="menu_ss_payments" name="الدفعات" parent="menu_ss_money_root"
+              action="action_ss_payments" sequence="10"/>
+
+    <!-- 3 · master data -->
+    <menuitem id="menu_ss_data_root" name="البيانات الأساسية" parent="menu_ss_root" sequence="30"/>
+    <menuitem id="menu_ss_halls" name="القاعات" parent="menu_ss_data_root"
+              action="action_ss_halls" sequence="10"/>
+    <menuitem id="menu_ss_services" name="الخدمات والبكجات" parent="menu_ss_data_root"
+              action="action_ss_services" sequence="20"/>
+    <menuitem id="menu_ss_pricelists" name="قوائم الأسعار" parent="menu_ss_data_root"
+              action="action_ss_pricelists" sequence="30"
+              groups="seven_stars_rental.group_ss_manager"/>
+
+    <!-- 4 · configuration — administrators.
+         Not group_ss_manager: res.config.settings needs base.group_system, so Odoo hides a
+         settings menu from anyone without it anyway (_visible_menu_ids drops menus whose
+         action the user cannot reach). Declaring the real requirement is honest; pretending
+         otherwise would put a menu on screen that opens nothing. -->
+    <menuitem id="menu_ss_config_root" name="الإعدادات" parent="menu_ss_root" sequence="90"
+              groups="base.group_system"/>
+    <menuitem id="menu_ss_settings" name="إعدادات سفن ستارز" parent="menu_ss_config_root"
+              action="sale_renting.action_rental_config_settings" sequence="10"/>
+    <menuitem id="menu_ss_recurrences" name="مدد الإيجار" parent="menu_ss_config_root"
+              action="sale_renting.sale_temporal_recurrence_action" sequence="20"/>
+
+</odoo>
