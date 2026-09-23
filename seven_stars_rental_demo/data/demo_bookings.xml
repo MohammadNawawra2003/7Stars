@@ -51,6 +51,8 @@
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-05-15 15:00:00</field>
         <field name="rental_return_date">2026-05-15 20:00:00</field>
+        <field name="groom_name">أحمد</field>
+        <field name="bride_name">رنا</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="800"/>
         <field name="required_deposit_amount" eval="5000.0"/>
@@ -72,6 +74,7 @@
         <field name="appendix_security">4 أفراد أمن</field>
         <field name="appendix_photo_studio">استوديو النجوم</field>
         <field name="appendix_details">زفة على الشاشات الساعة 20:00</field>
+        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_hall_contract')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -104,6 +107,7 @@
         <field name="booking_state">completed</field>
         <field name="state">sale</field>
         <field name="internal_note_men">غداء مكتمل</field>
+        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_lunch_contract')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -129,6 +133,7 @@
         <field name="booking_state">completed</field>
         <field name="state">sale</field>
         <field name="internal_note_men">غداء مكتمل</field>
+        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_lunch_contract')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -148,6 +153,8 @@
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-08-14 15:00:00</field>
         <field name="rental_return_date">2026-08-14 20:00:00</field>
+        <field name="groom_name">محمود</field>
+        <field name="bride_name">هنادي</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="900"/>
         <field name="required_deposit_amount" eval="5000.0"/>
@@ -169,6 +176,7 @@
         <field name="appendix_security">4 أفراد أمن</field>
         <field name="appendix_photo_studio">استوديو الأمل</field>
         <field name="appendix_details">—</field>
+        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_hall_contract'), ref('seven_stars_rental.action_report_lunch_contract')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -216,6 +224,7 @@
         <field name="appendix_security">فردان</field>
         <field name="appendix_photo_studio">—</field>
         <field name="appendix_details">حنة — قاعة النساء فقط</field>
+        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_henna_contract')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -281,6 +290,8 @@
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-09-25 15:00:00</field>
         <field name="rental_return_date">2026-09-25 20:00:00</field>
+        <field name="groom_name">يوسف</field>
+        <field name="bride_name">دعاء</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="850"/>
         <field name="required_deposit_amount" eval="5000.0"/>
@@ -302,6 +313,7 @@
         <field name="appendix_security">4 أفراد أمن</field>
         <field name="appendix_photo_studio">استوديو النجوم</field>
         <field name="appendix_details">جاهز — تم تأكيد كل البنود</field>
+        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_hall_contract')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -400,6 +412,8 @@
         <field name="pricelist_id" ref="seven_stars_rental.pricelist_wedding_pair"/>
         <field name="rental_start_date">2026-10-09 15:00:00</field>
         <field name="rental_return_date">2026-10-09 20:00:00</field>
+        <field name="groom_name">كريم</field>
+        <field name="bride_name">سلمى</field>
         <field name="event_type">wedding</field>
         <field name="guest_count" eval="780"/>
         <field name="required_deposit_amount" eval="5000.0"/>

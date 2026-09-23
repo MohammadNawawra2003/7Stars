@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Where Seven Stars writes its own contract wording. The legal text is customer-owned
+         (spec Appendix A), so it must be reachable without a developer: Settings ▸ Technical
+         ▸ Reports ▸ the contract ▸ «نص العقد». Each contract type carries its own, which is
+         what makes the three genuinely different documents. -->
+    <record id="ir_actions_report_form_seven_stars" model="ir.ui.view">
+        <field name="name">ir.actions.report.form.seven.stars</field>
+        <field name="model">ir.actions.report</field>
+        <field name="inherit_id" ref="base.act_report_xml_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='print_report_name']" position="after">
+                <field name="ss_is_contract"/>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <group string="نص العقد" invisible="not ss_is_contract">
+                    <field name="ss_contract_body" nolabel="1"
+                           placeholder="ألصق هنا نص الاتفاقية المعتمد من إدارة قاعات سفن ستارز — التمهيد والبنود المرقّمة. يُطبع بين «أولاً: مقدمة الاتفاقية» و«رابعاً: التوقيعات»."/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

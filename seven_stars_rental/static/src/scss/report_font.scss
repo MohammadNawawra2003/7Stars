@@ -10,8 +10,107 @@
 // included, is not this addon's to restyle.
 .o_ss_report {
     font-family: 'Tajawal', 'Noto Naskh Arabic', sans-serif;
+    line-height: 1.6;
 
     h2, h3, h4, strong, th {
         font-weight: 700;
+    }
+
+    // ---- the agreement (RPT-01/02/03), after the document Jamal supplied ----
+    .ss-party {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        padding: 8px;
+    }
+
+    .ss-section-title {
+        font-weight: 700;
+        text-decoration: underline;
+        margin: 18px 0 10px;
+    }
+
+    .ss-clause,
+    .ss-contract-body {
+        text-align: justify;
+        // Arabic indents from the right.
+        padding-inline-start: 15px;
+    }
+
+    .ss-sign-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 24px;
+
+        td {
+            width: 50%;
+            padding: 12px;
+            vertical-align: top;
+        }
+    }
+
+    .ss-sign-box {
+        border: 2px solid #000;
+        background-color: #fafafa;
+        min-height: 120px;
+        padding: 14px;
+        text-align: center;
+    }
+
+    .ss-sign-party { font-weight: 700; margin-bottom: 6px; }
+    .ss-sign-name  { font-weight: 700; font-size: .92em; margin-bottom: 26px; }
+    .ss-sign-rule  {
+        border-top: 1px solid #666;
+        padding-top: 6px;
+        font-size: .82em;
+        margin-top: 24px;
+    }
+
+    // ---- the booking sheet (RPT-09) ----
+    .ss-booking-title {
+        background-color: #E8E2D6;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.15em;
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    .ss-booking-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        td {
+            border: 1px solid #bbb;
+            padding: 5px 8px;
+            vertical-align: middle;
+        }
+    }
+
+    .ss-row-head {
+        background-color: #f0ede7;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .ss-label { background-color: #f8f7f4; font-weight: 700; width: 25%; }
+    .ss-value { width: 25%; }
+
+    .ss-money td {
+        text-align: center;
+        font-weight: 700;
+        padding: 8px !important;
+    }
+
+    .ss-total     { background-color: #E8E2D6; }
+    .ss-paid      { background-color: #DDEBE2; }
+    .ss-remaining { background-color: #F6E7CE; }
+
+    .ss-final {
+        background-color: #E8E2D6;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.1em;
+        padding: 9px !important;
     }
 }

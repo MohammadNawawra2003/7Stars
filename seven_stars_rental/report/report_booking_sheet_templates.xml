@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- RPT-09 · تفاصيل الحجز — the booking sheet.
+
+     Jamal, 2026-09-23: «contract and booking to be able doing this, however, they will have
+     different template». This is the BOOKING half, and it is deliberately a different
+     document from the agreement: one page, every fact about the booking in one table, no
+     legal text and no signatures. It is what the floor and the customer look at; the
+     agreement is what gets signed.
+
+     Modelled on the «تفاصيل الحجز» sheet he supplied, section for section. Every value is a
+     real Odoo field — the source document used free-text Studio fields for the hall, the
+     paid and the remaining amounts, which is exactly the duplicate-truth this project
+     refuses. Here the hall comes from the rental lines, the money from the payments.
+
+     Two faults in the supplied document are deliberately NOT reproduced:
+       · «₪ 1,900.00 ₪» — the currency was printed once by hand and once by the widget.
+       · «، ،» — street, street2 and city joined with commas even when all three were empty.
+-->
+
+<template id="report_booking_sheet_document">
+<t t-call="web.external_layout">
+    <div class="page o_ss_report">
+
+        <div class="ss-booking-title">تفاصيل الحجز</div>
+
+        <table class="ss-booking-table">
+
+            <tr><td colspan="4" class="ss-row-head">معلومات الحجز الأساسية</td></tr>
+            <tr>
+                <td class="ss-label">رقم الطلب</td>
+                <td class="ss-value"><span t-field="doc.name"/></td>
+                <td class="ss-label">تاريخ الحجز</td>
+                <td class="ss-value">
+                    <span t-field="doc.date_order" t-options='{"widget": "date"}'/>
+                </td>
+            </tr>
+            <tr>
+                <td class="ss-label">اسم الحاجز</td>
+                <td class="ss-value"><span t-field="doc.partner_id.name"/></td>
+                <td class="ss-label">الجوال</td>
+                <!-- A phone number is Latin digits inside an Arabic document: without its own
+                     direction the bidi algorithm reorders it. -->
+                <td class="ss-value" dir="ltr" style="unicode-bidi: embed;">
+                    <span t-field="doc.partner_id.phone"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="ss-label">واتساب</td>
+                <td class="ss-value" dir="ltr" style="unicode-bidi: embed;">
+                    <span t-field="doc.partner_id.whatsapp"/>
+                </td>
+                <td class="ss-label">رقم الهوية</td>
+                <td class="ss-value" dir="ltr" style="unicode-bidi: embed;">
+                    <span t-field="doc.partner_id.id_number"/>
+                </td>
+            </tr>
+
+            <tr><td colspan="4" class="ss-row-head">عنوان الحاجز</td></tr>
+            <tr>
+                <td class="ss-label">العنوان</td>
+                <!-- Joined in Python so an empty address prints nothing, not «، ،». -->
+                <td colspan="3" class="ss-value">
+                    <span t-out="'، '.join(part for part in (
+                        doc.partner_id.street, doc.partner_id.street2, doc.partner_id.city
+                    ) if part)"/>
+                </td>
+            </tr>
+
+            <tr><td colspan="4" class="ss-row-head">تفاصيل المناسبة</td></tr>
+            <tr>
+                <td class="ss-label">اسم العريس</td>
+                <td class="ss-value"><span t-field="doc.groom_name"/></td>
+                <td class="ss-label">اسم العروس</td>
+                <td class="ss-value"><span t-field="doc.bride_name"/></td>
+            </tr>
+            <tr>
+                <td class="ss-label">نوع المناسبة</td>
+                <td class="ss-value"><span t-field="doc.event_type"/></td>
+                <td class="ss-label">تاريخ الحفل</td>
+                <td class="ss-value">
+                    <span t-field="doc.rental_start_date" t-options='{"widget": "date"}'/>
+                </td>
+            </tr>
+            <tr>
+                <td class="ss-label">وقت بداية الحفل</td>
+                <td class="ss-value">
+                    <span t-field="doc.rental_start_date" t-options='{"widget": "datetime"}'/>
+                </td>
+                <td class="ss-label">وقت نهاية الحفل</td>
+                <td class="ss-value">
+                    <span t-field="doc.rental_return_date" t-options='{"widget": "datetime"}'/>
+                </td>
+            </tr>
+            <tr>
+                <td class="ss-label">الشخص المسؤول عن المناسبة</td>
+                <td class="ss-value"><span t-field="doc.partner_id.responsible_person"/></td>
+                <td class="ss-label">حالة الحجز</td>
+                <td class="ss-value"><span t-field="doc.booking_state"/></td>
+            </tr>
+
+            <tr><td colspan="4" class="ss-row-head">معلومات القاعة</td></tr>
+            <tr>
+                <td class="ss-label">اسم القاعة</td>
+                <!-- The halls actually booked, not a typed-in name. A wedding shows two. -->
+                <td class="ss-value">
+                    <span t-out="'، '.join(doc.hall_ids.mapped('name'))"/>
+                </td>
+                <td class="ss-label">عدد الحضور</td>
+                <td class="ss-value"><span t-out="doc.guest_count"/></td>
+            </tr>
+            <tr>
+                <td class="ss-label">السعة الإجمالية للقاعات</td>
+                <td class="ss-value">
+                    <span t-out="sum(doc.hall_ids.mapped('product_tmpl_id.hall_capacity'))"/>
+                </td>
+                <td class="ss-label">مدة الحجز</td>
+                <!-- A hall is almost always booked for one evening, and duration_days is 0
+                     for that — «يوم 0» reads as a fault. Hours below a full day. -->
+                <td class="ss-value">
+                    <t t-if="doc.duration_days &gt;= 1">
+                        <span t-out="doc.duration_days"/> يوم
+                    </t>
+                    <t t-elif="doc.rental_start_date and doc.rental_return_date">
+                        <span t-out="round((doc.rental_return_date - doc.rental_start_date).total_seconds() / 3600.0, 1)"/> ساعة
+                    </t>
+                </td>
+            </tr>
+
+            <tr><td colspan="4" class="ss-row-head">المعلومات المالية</td></tr>
+            <tr class="ss-money">
+                <td class="ss-total">
+                    الإجمالي<br/>
+                    <span t-field="doc.amount_total"
+                          t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                </td>
+                <td class="ss-label" style="text-align:center;">العربون المطلوب<br/>
+                    <span t-field="doc.required_deposit_amount"
+                          t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                </td>
+                <td class="ss-paid">
+                    المبلغ المدفوع<br/>
+                    <span t-field="doc.collected_amount"
+                          t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                </td>
+                <td class="ss-remaining">
+                    المبلغ المتبقي<br/>
+                    <span t-field="doc.outstanding_amount"
+                          t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                </td>
+            </tr>
+
+            <tr><td colspan="4" class="ss-row-head">الخدمات الإضافية</td></tr>
+            <!-- Real order lines, so what is listed here is what is charged. -->
+            <t t-set="service_lines"
+               t-value="doc.order_line.filtered(lambda sol: not sol.display_type and not sol.is_rental)"/>
+            <tr t-foreach="service_lines" t-as="line">
+                <td colspan="2" class="ss-value"><span t-field="line.name"/></td>
+                <td class="ss-value" style="text-align:center;">
+                    <span t-out="int(line.product_uom_qty)"/>
+                </td>
+                <td class="ss-value" style="text-align:end;">
+                    <span t-field="line.price_subtotal"
+                          t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                </td>
+            </tr>
+            <tr t-if="not service_lines">
+                <td colspan="4" class="ss-value text-muted">لا توجد خدمات إضافية على هذا الحجز.</td>
+            </tr>
+
+            <tr><td colspan="4" class="ss-row-head">ملاحظات</td></tr>
+            <tr>
+                <td class="ss-label">ملاحظات قاعة الرجال</td>
+                <td class="ss-value"><span t-field="doc.internal_note_men"/></td>
+                <td class="ss-label">ملاحظات قاعة النساء</td>
+                <td class="ss-value"><span t-field="doc.internal_note_women"/></td>
+            </tr>
+
+            <tr>
+                <td colspan="4" class="ss-final">
+                    السعر النهائي للحجز:
+                    <span t-field="doc.amount_total"
+                          t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+</t>
+</template>
+
+<template id="report_booking_sheet">
+    <!-- `lang` is read by web.report_layout to set <body dir=...>
+         (web/views/report_templates.xml:29); t-lang on the inner call is what formats the
+         field VALUES in Arabic. Both are needed. -->
+    <t t-set="lang" t-value="'ar_001'"/>
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="seven_stars_rental.report_booking_sheet_document" t-lang="'ar_001'"/>
+        </t>
+    </t>
+</template>
+
+</odoo>

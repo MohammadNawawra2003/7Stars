@@ -107,4 +107,18 @@
     <field name="binding_type">report</field>
 </record>
 
+<!-- RPT-09 · تفاصيل الحجز — the booking sheet, deliberately a different document from the
+     agreement (Jamal, 2026-09-23: «they will have different template»). -->
+<record id="action_report_booking_sheet" model="ir.actions.report">
+    <field name="name">تفاصيل الحجز</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">seven_stars_rental.report_booking_sheet</field>
+    <field name="report_file">seven_stars_rental.report_booking_sheet</field>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="print_report_name">'تفاصيل الحجز - %s' % (object.name)</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+
 </odoo>

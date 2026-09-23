@@ -17,6 +17,7 @@ ORDER_REPORTS = [
     'action_report_booking_confirmation',
     'action_report_payment_statement',
     'action_report_event_details',
+    'action_report_booking_sheet',
 ]
 
 
@@ -91,7 +92,7 @@ class TestReports(SevenStarsCommon):
         self.assertEqual(report_type, 'html')
         return body.decode() if isinstance(body, bytes) else body
 
-    def test_all_eight_reports_render(self):
+    def test_all_nine_reports_render(self):
         for xmlid in ORDER_REPORTS:
             with self.subTest(report=xmlid):
                 html = self._html(xmlid, self.booking)
@@ -124,8 +125,9 @@ class TestReports(SevenStarsCommon):
 
     def test_the_contract_has_signature_blocks_for_both_parties(self):
         html = self._html('action_report_hall_contract', self.booking)
-        self.assertIn('الطرف الأول', html)
-        self.assertIn('الطرف الثاني', html)
+        # «الفريق» since 2026-09-23: the wording of the real agreement Jamal supplied.
+        self.assertIn('الفريق الأول', html)
+        self.assertIn('الفريق الثاني', html)
         self.assertIn('التوقيع', html)
 
     def test_the_appendix_prints_all_fifteen_items(self):

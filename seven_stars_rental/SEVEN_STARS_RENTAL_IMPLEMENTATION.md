@@ -490,3 +490,91 @@ that are not ours.
 
 Branch `staging` only. `main`, `stage` and `dev` were never touched, and nothing was
 force-pushed.
+
+---
+
+## 21 · Jamal feedback #6 — contract and booking templates (2026-09-23)
+
+### The three files reviewed
+
+| File | What it actually is |
+|---|---|
+| `Contract (1).pdf` | A rendered 2-page hall agreement — «اتفاقية» — of **«قاعات بلدي للأفراح والمناسبات», Ramallah/Al-Bireh** |
+| `SO Report  (1).pdf` | A rendered 1-page booking sheet — «تفاصيل الحجز» — of the same company |
+| `customizations.zip` | That company's **Odoo Studio export** (`author: Baladi`), holding the QWeb source of both, plus a third empty report |
+
+### ⚠⚠⚠ The contradiction, stated before anything was changed
+
+**The supplied documents belong to a different client.** Their wording names
+«قاعات بلدي للأفراح والمناسبات، شارع القدس، رام الله - البيرة» as الفريق الأول, and their
+seventeen clauses carry that company's own commercial terms — a 3-hour event, 1,500 ₪ for
+each additional hour, 30% at signing with the balance 30 days before the event. Seven Stars'
+own terms differ (PRD: a 3,000–5,000 deposit per hall, four halls, Al Walaja — Bethlehem).
+
+Reproducing that wording would have put another company's name and another company's
+obligations on a Seven Stars contract. Jamal's own note settles it: *«contract and booking to
+be able doing this, however, they will have different template»*. So the **structure and the
+capability** were taken from these files; **the wording was not**, and none has been drafted
+or paraphrased for Seven Stars.
+
+### Field mapping — their Studio fields against ours
+
+Every value their sheet printed from a free-text Studio field already existed here as a real
+one, which is why nothing new had to be modelled:
+
+| Their field | Ours |
+|---|---|
+| `x_studio_char_field_9gd_…` اسم العريس | `groom_name` |
+| `x_studio_bride_name` | `bride_name` |
+| `x_studio_type` | `event_type` |
+| `x_studio_hall` (a Selection) | `hall_ids` — the halls actually on the rental lines |
+| `x_studio_attendance_count` | `guest_count` |
+| `x_studio_paid_amount` | `collected_amount` — from posted payments, not typed |
+| `x_studio_remaining_amount` | `outstanding_amount` |
+| `x_studio_` («خيارات», a m2m of tags) | the real service order lines |
+| `doc.note` printed as «الخدمات الإضافية» | the service lines, priced |
+
+### What changed
+
+**A new document, RPT-09 «تفاصيل الحجز»** (`report/report_booking_sheet_templates.xml`) —
+the booking half, section for section after the supplied sheet: basic booking, address,
+event, hall, money, extra services, notes, final price. It is deliberately NOT a contract:
+no legal text, no signatures, asserted by `test_the_booking_sheet_is_not_a_contract`.
+
+**The agreement was restructured** to the supplied shape: «اتفاقية» and its date, the two
+parties (الفريق الأول read from `res.company`, never typed), «أولاً: مقدمة الاتفاقية»
+carrying the order number and the agreed amount, then the wording, then «رابعاً: التوقيعات»
+as two bordered signature boxes.
+
+**Legal text became data.** `ir.actions.report.ss_contract_body` — one per contract type,
+editable at Settings ▸ Technical ▸ Reports ▸ «نص العقد». This is what makes the three
+contracts genuinely different documents, and it means approved wording never needs a code
+change. A type with no wording still prints a visible placeholder.
+
+**Two faults in the supplied documents were deliberately not reproduced:** `₪ 1,900.00 ₪`
+(the currency printed once by hand beside the widget's own) and `، ،` (address parts joined
+with commas when all were empty). Both are covered by tests.
+
+**Also corrected:** «مدة الحجز» printed «يوم 0» for a same-day booking — it now reports hours
+below a full day; and the demo company carries the client's real logo instead of Odoo's
+"Your logo".
+
+### Still missing, and only the client can supply it
+
+The approved Arabic wording for each of the three Seven Stars contracts. Until it is pasted
+into «نص العقد», each contract prints its placeholder. PRD §22 item 16 remains open.
+
+### Tests
+
+`tests/test_contract_and_booking_documents.py` — 13 tests: every section of the booking
+sheet, real booking data on it, the services actually charged, no doubled currency, no bare
+commas, the sheet is not a contract, the agreement's structure across all three types, the
+intro quoting order number and amount, the first party coming from the company, per-type
+wording that does not leak between types, a missing-wording type saying so visibly, and
+`test_no_other_companys_contract_wording_was_copied` which fails if «بلدي», «رام الله»,
+«البيرة» or «1500 شيكل» ever appears in a Seven Stars contract.
+
+**Rendered-PDF verification.** `wkhtmltopdf` is not installed on this machine, so the four
+documents were rendered through a real browser against a live Odoo (`/report/html/…`) and
+inspected as images: booking sheet, and the wedding, henna and lunch contracts. The wedding
+contract shows hall 3 at 14,000 and hall 4 at 0.00 — the pair rule holding in print.

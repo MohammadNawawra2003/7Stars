@@ -14,3 +14,12 @@ class IrActionsReport(models.Model):
     ss_is_contract = fields.Boolean(
         string="عقد من عقود سفن ستارز",
         help="Offered in «نوع العقد» on a booking, and printed by «طباعة العقود».")
+    ss_contract_body = fields.Html(
+        string="نص العقد",
+        sanitize=False, translate=False,
+        help="نص الاتفاقية كما تعتمده إدارة قاعات سفن ستارز: التمهيد والبنود المرقّمة. "
+             "يُطبع بين «أولاً: مقدمة الاتفاقية» و«التوقيعات».\n\n"
+             "The agreement's own wording, per contract type — which is what makes the three "
+             "contracts genuinely different documents rather than one template with a "
+             "different heading. It is EDITABLE DATA on purpose: legal text must never need a "
+             "code change, and none of it may be drafted by us.")
