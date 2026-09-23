@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- The operating company, so the eight printed documents carry a real letterhead.
-         The company currency is deliberately NOT changed here: every demo pricelist is in ILS,
-         which is what drives sale.order.currency_id. Switching res.company.currency_id is a
-         one-off configuration step on a live database, not demo data. -->
+    <!-- The operating company, so the printed documents carry a real letterhead. -->
     <record id="base.main_company" model="res.company">
         <field name="name">قاعات سفن ستارز — Seven Stars Halls</field>
         <field name="street">الولجة</field>
         <field name="city">بيت لحم</field>
+        <!-- ⚠ The company CURRENCY is not set here. The chart of accounts is applied after
+             every module's data (see res_company._ss_ensure_accounting) and the chart
+             template writes the currency, so anything set at this point is overwritten. It
+             is set in demo_payments.xml instead, right after the chart is in place. -->
         <!-- Without this the letterhead on every printed contract reads «الولايات المتحدة»,
              which is the country a fresh Odoo database defaults to. Spotted on staging
              S00033. On a live database this is a one-off setting, not something a dataset

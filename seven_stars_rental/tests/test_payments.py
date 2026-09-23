@@ -137,6 +137,14 @@ class TestPayments(SevenStarsCommon):
         self.assertTrue(payment.move_id, "a payment must reach the general ledger")
         self.assertEqual(payment.move_id.state, 'posted')
 
+    def test_a_payment_is_in_the_bookings_currency(self):
+        """A hall is paid in shekels. A payment takes the COMPANY's currency unless it is
+        told otherwise, which once put «$ 5,000.00» on a ₪ 15,000.00 booking."""
+        order = self._booking([self.hall], *self.evening(2032, 8, 6))
+        self._pay(order, 1000.0)
+
+        self.assertEqual(order.payment_ids.currency_id, order.currency_id)
+
     def test_confirming_a_booking_invoices_it_automatically(self):
         order = self._booking([self.hall], *self.evening(2032, 6, 11),
                               required_deposit_amount=3000.0, booking_state='awaiting')

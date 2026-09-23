@@ -62,6 +62,9 @@ class SsPaymentRegister(models.TransientModel):
             'partner_type': 'customer',
             'payment_type': 'outbound' if self.is_refund else 'inbound',
             'amount': self.amount,
+            # The booking's currency, never the company default: a hall is paid in shekels
+            # and a payment left on a USD company reads as «$ 5,000.00» on the booking.
+            'currency_id': self.order_id.currency_id.id,
             'date': self.date,
             'journal_id': self.journal_id.id,
             'memo': self.memo,

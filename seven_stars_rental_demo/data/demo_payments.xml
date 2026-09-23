@@ -27,6 +27,16 @@
          database that already has a chart, which is all of them after the first build. -->
     <function model="res.company" name="_ss_ensure_accounting" eval="[]"/>
 
+    <!-- Seven Stars trades in shekels. The pricelists already are, so a booking is — but a
+         payment takes the COMPANY's currency, and the chart template leaves that at Odoo's
+         default. The result was «$ 5,000.00» sitting on a ₪ 15,000.00 booking.
+         ⚠ Must come after the chart is loaded, or the chart overwrites it. On a live
+         database with journal entries already posted, this is a deliberate accounting
+         decision, not a dataset's to make. -->
+    <record id="base.main_company" model="res.company">
+        <field name="currency_id" ref="base.ILS"/>
+    </record>
+
     <!-- Odoo's default chart ships a bank journal but no cash journal, and a hall takes
          most of its money in cash. -->
     <record id="journal_cash" model="account.journal">

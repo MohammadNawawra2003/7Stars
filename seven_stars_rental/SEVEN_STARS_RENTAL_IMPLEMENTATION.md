@@ -597,3 +597,36 @@ wording that does not leak between types, a missing-wording type saying so visib
 documents were rendered through a real browser against a live Odoo (`/report/html/…`) and
 inspected as images: booking sheet, and the wedding, henna and lunch contracts. The wedding
 contract shows hall 3 at 14,000 and hall 4 at 0.00 — the pair rule holding in print.
+
+---
+
+## 22 · Currency, and the one upstream test it moves
+
+A payment takes the **company's** currency unless told otherwise. The pricelists are in
+shekels so a booking always was, but the company was left on Odoo's default — which put
+«$ 5,000.00» on a ₪ 15,000.00 booking, visible on staging and in the first cut of the demo
+video. Two changes:
+
+- `ss.payment.register` writes the **booking's** currency onto the payment. That is the fix
+  in the addon, and `test_a_payment_is_in_the_bookings_currency` holds it.
+- The starter dataset puts the company itself on ILS, so a demo database looks like the real
+  business. ⚠ It must be set **after** the chart of accounts loads — the chart template
+  writes the currency, so anything set in `demo_company.xml` is silently overwritten.
+
+⚠ **On a live database, changing the company currency is an accounting decision, not a
+dataset's to make.** Once journal entries exist it is not a casual switch. It stays a
+deployment step, alongside the chart of accounts and the country.
+
+### The upstream number, stated exactly
+
+| What is installed | `sale` + `sale_renting` |
+|---|---|
+| `seven_stars_rental` alone | **289 / 289** |
+| plus `seven_stars_rental_demo` | 288 / 289 |
+
+The one that moves is `sale_renting.test_rental.TestRentalCommon.test_product_display_price`,
+which asserts the literal string `'$\xa01.00 (fixed)'`. It is asserting the **company's**
+currency symbol, so it fails for any company that does not trade in dollars — a Palestinian
+hall included. It is not caused by the addon: with the business module alone, standard Odoo
+is untouched at 289/289. It is the price of a starter dataset that tells the truth about the
+client's currency.
