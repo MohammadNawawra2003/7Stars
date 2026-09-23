@@ -137,8 +137,8 @@ class TestContractAndBookingDocuments(SevenStarsCommon):
 
     def test_a_contract_type_prints_its_own_approved_wording(self):
         """The three contracts are different documents because each carries its own text."""
-        report = self.env.ref('seven_stars_rental.action_report_henna_contract')
-        report.ss_contract_body = '<p>بند اختباري خاص بعقد الحنة.</p>'
+        ctype = self.env.ref('seven_stars_rental.contract_type_henna')
+        ctype.body = '<p>بند اختباري خاص بعقد الحنة.</p>'
 
         henna = self._html('action_report_henna_contract')
         wedding = self._html('action_report_hall_contract')
@@ -148,8 +148,7 @@ class TestContractAndBookingDocuments(SevenStarsCommon):
                          "wording must not leak between contract types")
 
     def test_a_contract_with_no_approved_wording_says_so_visibly(self):
-        report = self.env.ref('seven_stars_rental.action_report_lunch_contract')
-        report.ss_contract_body = False
+        self.env.ref('seven_stars_rental.contract_type_lunch').body = False
 
         html = self._html('action_report_lunch_contract')
         self.assertIn("الشروط والأحكام", html)

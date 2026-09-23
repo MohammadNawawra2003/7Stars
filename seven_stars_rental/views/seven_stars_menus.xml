@@ -117,6 +117,9 @@
          otherwise would put a menu on screen that opens nothing. -->
     <menuitem id="menu_ss_config_root" name="الإعدادات" parent="menu_ss_root" sequence="90"
               groups="base.group_system"/>
+    <menuitem id="menu_ss_contract_types" name="نصوص العقود" parent="menu_ss_config_root"
+              action="action_ss_contract_types" sequence="15"/>
+
     <menuitem id="menu_ss_settings" name="إعدادات سفن ستارز" parent="menu_ss_config_root"
               action="sale_renting.action_rental_config_settings" sequence="10"/>
     <menuitem id="menu_ss_recurrences" name="مدد الإيجار" parent="menu_ss_config_root"

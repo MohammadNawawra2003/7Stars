@@ -5,3 +5,5 @@ access_ss_payment_register_manager,ss.payment.register management,model_ss_payme
 access_ss_account_payment_clerk,account.payment read for the booking staff,account.model_account_payment,seven_stars_rental.group_ss_clerk,1,0,0,0
 access_ss_account_payment_accountant,account.payment read for the accountant,account.model_account_payment,seven_stars_rental.group_ss_accountant,1,0,0,0
 access_ss_account_payment_manager,account.payment read for management,account.model_account_payment,seven_stars_rental.group_ss_manager,1,0,0,0
+access_ss_contract_type_user,seven.stars.contract.type read for internal users,model_seven_stars_contract_type,base.group_user,1,0,0,0
+access_ss_contract_type_manager,seven.stars.contract.type management,model_seven_stars_contract_type,seven_stars_rental.group_ss_manager,1,1,1,1

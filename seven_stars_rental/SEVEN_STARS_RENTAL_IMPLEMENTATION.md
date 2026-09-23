@@ -546,10 +546,29 @@ parties (الفريق الأول read from `res.company`, never typed), «أول
 carrying the order number and the agreed amount, then the wording, then «رابعاً: التوقيعات»
 as two bordered signature boxes.
 
-**Legal text became data.** `ir.actions.report.ss_contract_body` — one per contract type,
-editable at Settings ▸ Technical ▸ Reports ▸ «نص العقد». This is what makes the three
-contracts genuinely different documents, and it means approved wording never needs a code
-change. A type with no wording still prints a visible placeholder.
+**Legal text became data.** `seven.stars.contract.type` — one record per contract type, with
+its `body`, editable at **قاعات سفن ستارز ▸ الإعدادات ▸ نصوص العقود**. This is what makes the
+three contracts genuinely different documents, and it means approved wording never needs a
+code change. A type with no wording still prints a visible placeholder.
+
+⚠⚠⚠ **Why a model and not two fields on `ir.actions.report`.** The first cut put
+`ss_is_contract` and `ss_contract_body` directly on `ir.actions.report`. It passed every local
+test and it broke Odoo.sh staging the moment anyone opened Apps or pressed Upgrade:
+
+    psycopg2.errors.UndefinedColumn: column ir_act_report_xml.ss_is_contract does not exist
+      … ir_module.py:637  self.env.cr.commit()
+      … ir_module.py:246  module.reports_by_module = … browse('ir.actions.report')
+
+`ir.module.module._get_views` computes `reports_by_module` by reading `ir.actions.report`, and
+the ORM fetches every stored column of that model in one query. Between "new code loaded" and
+"module upgraded" the registry knows the field but the column does not exist — and
+`_button_immediate_function` commits, and therefore flushes, **before** running the upgrade.
+So a new stored field there makes upgrading from the web UI impossible, which is the only
+route the client has. `test_a_contract_type_never_becomes_a_column_on_ir_actions_report`
+fails if any `ss_*` field reappears on that model.
+
+⚠ `contract_type_ids` sits on every `sale.order`, so `base.group_user` needs read access on
+`seven.stars.contract.type` — the same trap that `account.payment` sprang earlier.
 
 **Two faults in the supplied documents were deliberately not reproduced:** `₪ 1,900.00 ₪`
 (the currency printed once by hand beside the widget's own) and `، ،` (address parts joined

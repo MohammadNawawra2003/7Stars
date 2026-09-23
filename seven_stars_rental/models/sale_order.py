@@ -99,11 +99,11 @@ class SaleOrder(models.Model):
         help="اختيار القاعة يضيفها إلى بنود الطلب بسعرها حسب قائمة أسعار الحجز.")
 
     # PRD §10 prints three different contracts and a booking can need more than one — a
-    # wedding with a henna night and a lunch. Marked on the report itself (ss_is_contract) so
-    # a fourth contract is a new report, not a code change here.
-    contract_report_ids = fields.Many2many(
-        'ir.actions.report', string="نوع العقد",
-        domain=[('ss_is_contract', '=', True)],
+    # wedding with a henna night and a lunch. They live on their own model, NOT as fields on
+    # ir.actions.report: a stored column there makes upgrading from the web UI impossible.
+    # See seven_stars_contract_type.py for the traceback that proved it.
+    contract_type_ids = fields.Many2many(
+        'seven.stars.contract.type', string="نوع العقد",
         help="العقود التي تُطبع لهذا الحجز. يمكن اختيار أكثر من نوع.")
 
     # --------------------------------------------------------------- money (§6.1)
@@ -297,15 +297,16 @@ class SaleOrder(models.Model):
     def action_ss_print_contracts(self):
         """Print every contract type selected on this booking, as one PDF."""
         self.ensure_one()
-        if not self.contract_report_ids:
+        reports = self.contract_type_ids.report_id
+        if not reports:
             raise UserError(self.env._(
                 "اختر «نوع العقد» أولاً في تبويب «الحجز».\n\n"
                 "No contract type is selected on this booking."))
-        if len(self.contract_report_ids) == 1:
-            return self.contract_report_ids.report_action(self)
+        if len(reports) == 1:
+            return reports.report_action(self)
         streams = [
             report._render_qweb_pdf(report.report_name, self.ids)[0]
-            for report in self.contract_report_ids
+            for report in reports
         ]
         attachment = self.env['ir.attachment'].create({
             'name': f"عقود - {self.name}.pdf",

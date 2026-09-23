@@ -14,7 +14,7 @@
 
      ⚠ THE LEGAL TEXT IS CUSTOMER-OWNED. Appendix A of the specification records it as
      «الشايب / النص من سفن ستارز»: Al Shayeb builds the document, Seven Stars supplies the
-     wording. It is now EDITABLE DATA — `ir.actions.report.ss_contract_body`, one per contract
+     wording. It is now EDITABLE DATA — `seven.stars.contract.type.body`, one per contract
      type — so the three contracts are genuinely different documents and new wording never
      needs a code change. A type with no wording prints the placeholder below, visibly.
 
@@ -199,11 +199,11 @@
             <!-- the per-contract variant block -->
             <t t-out="0"/>
 
-            <!-- The agreement's own wording, taken from THIS contract type's ss_contract_body
+            <!-- The agreement's own wording, taken from THIS contract type's own body
                  so the three contracts are genuinely different documents. Still customer-owned:
                  when a type carries no text the placeholder prints instead, visibly. -->
-            <t t-if="contract_report and contract_report.ss_contract_body">
-                <div class="ss-contract-body mt-4" t-out="contract_report.ss_contract_body"/>
+            <t t-if="contract_type and contract_type.body">
+                <div class="ss-contract-body mt-4" t-out="contract_type.body"/>
             </t>
             <t t-else="">
                 <t t-call="seven_stars_rental.report_contract_terms_placeholder"/>
@@ -218,7 +218,7 @@
 <!-- RPT-01 · عقد استئجار القاعة (زفاف) -->
 <template id="report_hall_contract_document">
 <t t-set="contract_title" t-value="'عقد استئجار القاعة — زفاف'"/>
-<t t-set="contract_report" t-value="env.ref('seven_stars_rental.action_report_hall_contract', raise_if_not_found=False)"/>
+<t t-set="contract_type" t-value="env['seven.stars.contract.type']._ss_for_report('seven_stars_rental.action_report_hall_contract')"/>
         <t t-call="seven_stars_rental.report_contract_base">
             <div class="mt-3">
                 <p><strong>ملاحظات قاعة الرجال:</strong> <span t-field="doc.internal_note_men"/></p>
@@ -244,7 +244,7 @@
 <!-- RPT-02 · عقد حنة -->
 <template id="report_henna_contract_document">
 <t t-set="contract_title" t-value="'عقد استئجار قاعة — حنة'"/>
-<t t-set="contract_report" t-value="env.ref('seven_stars_rental.action_report_henna_contract', raise_if_not_found=False)"/>
+<t t-set="contract_type" t-value="env['seven.stars.contract.type']._ss_for_report('seven_stars_rental.action_report_henna_contract')"/>
         <t t-call="seven_stars_rental.report_contract_base">
             <div class="mt-3">
                 <p><strong>ملاحظات:</strong> <span t-field="doc.internal_note_women"/></p>
@@ -268,7 +268,7 @@
 <!-- RPT-03 · عقد خدمات غداء -->
 <template id="report_lunch_contract_document">
 <t t-set="contract_title" t-value="'عقد خدمات غداء'"/>
-<t t-set="contract_report" t-value="env.ref('seven_stars_rental.action_report_lunch_contract', raise_if_not_found=False)"/>
+<t t-set="contract_type" t-value="env['seven.stars.contract.type']._ss_for_report('seven_stars_rental.action_report_lunch_contract')"/>
         <t t-call="seven_stars_rental.report_contract_base">
             <div class="mt-3">
                 <p><strong>ملاحظات:</strong> <span t-field="doc.internal_note_men"/></p>

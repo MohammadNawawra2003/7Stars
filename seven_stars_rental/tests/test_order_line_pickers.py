@@ -172,12 +172,20 @@ class TestOrderLinePickers(TransactionCase):
         self.assertEqual(self.customer.street, "الولجة")
 
     def test_the_three_contracts_are_offered_as_contract_types(self):
-        contracts = self.env['ir.actions.report'].search([('ss_is_contract', '=', True)])
+        types = self.env['seven.stars.contract.type'].search([])
 
-        self.assertEqual(len(contracts), 3)
-        for xmlid in ('action_report_hall_contract', 'action_report_henna_contract',
-                      'action_report_lunch_contract'):
-            self.assertIn(self.env.ref(f'seven_stars_rental.{xmlid}'), contracts)
+        self.assertEqual(len(types), 3)
+        for xmlid in ('contract_type_wedding', 'contract_type_henna', 'contract_type_lunch'):
+            self.assertIn(self.env.ref(f'seven_stars_rental.{xmlid}'), types)
+
+    def test_a_contract_type_never_becomes_a_column_on_ir_actions_report(self):
+        """⚠ A stored field on ir.actions.report makes upgrading from the web UI impossible:
+        ir.module.module._get_views reads every column of that model, and
+        _button_immediate_function flushes BEFORE the upgrade creates them. It broke staging
+        once (column ir_act_report_xml.ss_is_contract does not exist)."""
+        report_fields = self.env['ir.actions.report']._fields
+        leaked = [name for name in report_fields if name.startswith('ss_')]
+        self.assertFalse(leaked, f"these must live on seven.stars.contract.type: {leaked}")
 
     def test_the_documents_carry_the_arabic_report_font(self):
         """«تغيير نوع الخط» — the class the Tajawal rule is scoped to must reach the page."""
@@ -190,8 +198,8 @@ class TestOrderLinePickers(TransactionCase):
 
     def test_more_than_one_contract_type_can_be_selected(self):
         booking = self._booking()
-        booking.contract_report_ids = (
-            self.env.ref('seven_stars_rental.action_report_hall_contract')
-            | self.env.ref('seven_stars_rental.action_report_henna_contract'))
+        booking.contract_type_ids = (
+            self.env.ref('seven_stars_rental.contract_type_wedding')
+            | self.env.ref('seven_stars_rental.contract_type_henna'))
 
-        self.assertEqual(len(booking.contract_report_ids), 2)
+        self.assertEqual(len(booking.contract_type_ids), 2)

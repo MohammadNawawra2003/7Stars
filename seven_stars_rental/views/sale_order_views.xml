@@ -37,7 +37,7 @@
                         invisible="not is_rental_order or booking_state in ('cancelled', 'completed')"/>
                 <button name="action_ss_print_contracts" type="object"
                         string="طباعة العقود"
-                        invisible="not is_rental_order or not contract_report_ids"/>
+                        invisible="not is_rental_order or not contract_type_ids"/>
 
                 <!-- The eight PRD states, alongside the standard four. They are independent
                      fields and were verified coexisting at runtime (T4). -->
@@ -79,7 +79,7 @@
                             <!-- hall_ids lives on the form header above, where staff look
                                  for it. Picking one writes its rental line, priced by the
                                  booking's pricelist. -->
-                            <field name="contract_report_ids" widget="many2many_tags"
+                            <field name="contract_type_ids" widget="many2many_tags"
                                    options="{'no_create': True}"/>
                         </group>
                         <group string="بيانات العميل">

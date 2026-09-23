@@ -74,7 +74,7 @@
         <field name="appendix_security">4 أفراد أمن</field>
         <field name="appendix_photo_studio">استوديو النجوم</field>
         <field name="appendix_details">زفة على الشاشات الساعة 20:00</field>
-        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_hall_contract')])]"/>
+        <field name="contract_type_ids" eval="[(6, 0, [ref('seven_stars_rental.contract_type_wedding')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -107,7 +107,7 @@
         <field name="booking_state">completed</field>
         <field name="state">sale</field>
         <field name="internal_note_men">غداء مكتمل</field>
-        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_lunch_contract')])]"/>
+        <field name="contract_type_ids" eval="[(6, 0, [ref('seven_stars_rental.contract_type_lunch')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -133,7 +133,7 @@
         <field name="booking_state">completed</field>
         <field name="state">sale</field>
         <field name="internal_note_men">غداء مكتمل</field>
-        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_lunch_contract')])]"/>
+        <field name="contract_type_ids" eval="[(6, 0, [ref('seven_stars_rental.contract_type_lunch')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -176,7 +176,7 @@
         <field name="appendix_security">4 أفراد أمن</field>
         <field name="appendix_photo_studio">استوديو الأمل</field>
         <field name="appendix_details">—</field>
-        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_hall_contract'), ref('seven_stars_rental.action_report_lunch_contract')])]"/>
+        <field name="contract_type_ids" eval="[(6, 0, [ref('seven_stars_rental.contract_type_wedding'), ref('seven_stars_rental.contract_type_lunch')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -224,7 +224,7 @@
         <field name="appendix_security">فردان</field>
         <field name="appendix_photo_studio">—</field>
         <field name="appendix_details">حنة — قاعة النساء فقط</field>
-        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_henna_contract')])]"/>
+        <field name="contract_type_ids" eval="[(6, 0, [ref('seven_stars_rental.contract_type_henna')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
@@ -313,7 +313,7 @@
         <field name="appendix_security">4 أفراد أمن</field>
         <field name="appendix_photo_studio">استوديو النجوم</field>
         <field name="appendix_details">جاهز — تم تأكيد كل البنود</field>
-        <field name="contract_report_ids" eval="[(6, 0, [ref('seven_stars_rental.action_report_hall_contract')])]"/>
+        <field name="contract_type_ids" eval="[(6, 0, [ref('seven_stars_rental.contract_type_wedding')])]"/>
         <field name="order_line" eval="[
             (5, 0, 0),
             (0, 0, {
