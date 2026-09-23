@@ -60,10 +60,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">زفاف مكتمل — قاعتا 3+4</field>
         <field name="appendix_event_date">2026-05-15</field>
-        <field name="appendix_promo_show" eval="True"/>
-        <field name="appendix_dabke_women" eval="True"/>
-        <field name="appendix_zaffa_groom" eval="True"/>
-        <field name="appendix_zaffa_on_screens" eval="True"/>
         <field name="appendix_lighting">إنارة كاملة + ليزر</field>
         <field name="appendix_hospitality_men">قهوة عربية وتمر</field>
         <field name="appendix_hospitality_women">عصائر وحلويات</field>
@@ -90,7 +86,7 @@
             'is_rental': True,
             'qty_delivered': 1,
             'qty_returned': 1,
-        })
+        }),
         ]"/>
     </record>
 
@@ -162,10 +158,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">زفاف مكتمل</field>
         <field name="appendix_event_date">2026-08-14</field>
-        <field name="appendix_promo_show" eval="True"/>
-        <field name="appendix_dabke_women" eval="True"/>
-        <field name="appendix_zaffa_groom" eval="True"/>
-        <field name="appendix_zaffa_on_screens" eval="False"/>
         <field name="appendix_lighting">إنارة كاملة</field>
         <field name="appendix_hospitality_men">قهوة وتمر</field>
         <field name="appendix_hospitality_women">عصائر</field>
@@ -192,7 +184,7 @@
             'is_rental': True,
             'qty_delivered': 1,
             'qty_returned': 1,
-        })
+        }),
         ]"/>
     </record>
 
@@ -210,10 +202,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">حنة في قاعة النساء وحدها — تسعيرة قياسية</field>
         <field name="appendix_event_date">2026-09-04</field>
-        <field name="appendix_promo_show" eval="False"/>
-        <field name="appendix_dabke_women" eval="True"/>
-        <field name="appendix_zaffa_groom" eval="False"/>
-        <field name="appendix_zaffa_on_screens" eval="False"/>
         <field name="appendix_lighting">إنارة هادئة</field>
         <field name="appendix_hospitality_men">—</field>
         <field name="appendix_hospitality_women">ضيافة كاملة</field>
@@ -233,7 +221,7 @@
             'is_rental': True,
             'qty_delivered': 1,
             'qty_returned': 1,
-        })
+        }),
         ]"/>
     </record>
 
@@ -299,10 +287,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">زفاف جاهز للمناسبة</field>
         <field name="appendix_event_date">2026-09-25</field>
-        <field name="appendix_promo_show" eval="True"/>
-        <field name="appendix_dabke_women" eval="True"/>
-        <field name="appendix_zaffa_groom" eval="True"/>
-        <field name="appendix_zaffa_on_screens" eval="True"/>
         <field name="appendix_lighting">إنارة كاملة</field>
         <field name="appendix_hospitality_men">قهوة عربية وتمر</field>
         <field name="appendix_hospitality_women">عصائر وحلويات</field>
@@ -325,7 +309,7 @@
             'product_id': ref('hall_4_product'),
             'product_uom_qty': 1,
             'is_rental': True,
-        })
+        }),
         ]"/>
     </record>
 
@@ -343,10 +327,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">غداء جاهز</field>
         <field name="appendix_event_date">2026-09-26</field>
-        <field name="appendix_promo_show" eval="False"/>
-        <field name="appendix_dabke_women" eval="False"/>
-        <field name="appendix_zaffa_groom" eval="False"/>
-        <field name="appendix_zaffa_on_screens" eval="False"/>
         <field name="appendix_lighting">إنارة عادية</field>
         <field name="appendix_hospitality_men">غداء كامل</field>
         <field name="appendix_hospitality_women">—</field>
@@ -381,10 +361,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">حفل توجيهي جاهز</field>
         <field name="appendix_event_date">2026-09-27</field>
-        <field name="appendix_promo_show" eval="True"/>
-        <field name="appendix_dabke_women" eval="False"/>
-        <field name="appendix_zaffa_groom" eval="False"/>
-        <field name="appendix_zaffa_on_screens" eval="True"/>
         <field name="appendix_lighting">إنارة كاملة</field>
         <field name="appendix_hospitality_men">ضيافة خفيفة</field>
         <field name="appendix_hospitality_women">ضيافة خفيفة</field>
@@ -401,7 +377,7 @@
             'product_id': ref('hall_2_product'),
             'product_uom_qty': 1,
             'is_rental': True,
-        })
+        }),
         ]"/>
     </record>
 
@@ -421,10 +397,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">زفاف مؤكد</field>
         <field name="appendix_event_date">2026-10-09</field>
-        <field name="appendix_promo_show" eval="True"/>
-        <field name="appendix_dabke_women" eval="True"/>
-        <field name="appendix_zaffa_groom" eval="True"/>
-        <field name="appendix_zaffa_on_screens" eval="True"/>
         <field name="appendix_lighting">إنارة كاملة</field>
         <field name="appendix_hospitality_men">قهوة وتمر</field>
         <field name="appendix_hospitality_women">عصائر</field>
@@ -446,7 +418,23 @@
             'product_id': ref('hall_4_product'),
             'product_uom_qty': 1,
             'is_rental': True,
-        })
+        }),
+            (0, 0, {
+            'product_id': ref('service_002_product'),
+            'product_uom_qty': 1,
+        }),
+            (0, 0, {
+            'product_id': ref('service_003_product'),
+            'product_uom_qty': 1,
+        }),
+            (0, 0, {
+            'product_id': ref('service_005_product'),
+            'product_uom_qty': 1,
+        }),
+            (0, 0, {
+            'product_id': ref('service_011_product'),
+            'product_uom_qty': 1,
+        }),
         ]"/>
     </record>
 
@@ -487,10 +475,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">زفاف مؤكد</field>
         <field name="appendix_event_date">2026-10-16</field>
-        <field name="appendix_promo_show" eval="True"/>
-        <field name="appendix_dabke_women" eval="True"/>
-        <field name="appendix_zaffa_groom" eval="True"/>
-        <field name="appendix_zaffa_on_screens" eval="False"/>
         <field name="appendix_lighting">إنارة كاملة</field>
         <field name="appendix_hospitality_men">قهوة وتمر</field>
         <field name="appendix_hospitality_women">عصائر وحلويات</field>
@@ -512,7 +496,19 @@
             'product_id': ref('hall_4_product'),
             'product_uom_qty': 1,
             'is_rental': True,
-        })
+        }),
+            (0, 0, {
+            'product_id': ref('service_002_product'),
+            'product_uom_qty': 1,
+        }),
+            (0, 0, {
+            'product_id': ref('service_003_product'),
+            'product_uom_qty': 1,
+        }),
+            (0, 0, {
+            'product_id': ref('service_005_product'),
+            'product_uom_qty': 1,
+        }),
         ]"/>
     </record>
 
@@ -576,10 +572,6 @@
         <field name="state">sale</field>
         <field name="internal_note_men">زفاف شتوي — تسعيرة الزوج الشتوية 12000</field>
         <field name="appendix_event_date">2026-11-13</field>
-        <field name="appendix_promo_show" eval="False"/>
-        <field name="appendix_dabke_women" eval="True"/>
-        <field name="appendix_zaffa_groom" eval="True"/>
-        <field name="appendix_zaffa_on_screens" eval="True"/>
         <field name="appendix_lighting">إنارة شتوية</field>
         <field name="appendix_hospitality_men">قهوة وتمر وشوربة</field>
         <field name="appendix_hospitality_women">مشروبات ساخنة</field>
@@ -601,7 +593,19 @@
             'product_id': ref('hall_4_product'),
             'product_uom_qty': 1,
             'is_rental': True,
-        })
+        }),
+            (0, 0, {
+            'product_id': ref('service_002_product'),
+            'product_uom_qty': 1,
+        }),
+            (0, 0, {
+            'product_id': ref('service_003_product'),
+            'product_uom_qty': 1,
+        }),
+            (0, 0, {
+            'product_id': ref('service_011_product'),
+            'product_uom_qty': 1,
+        }),
         ]"/>
     </record>
 
