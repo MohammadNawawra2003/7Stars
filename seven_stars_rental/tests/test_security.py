@@ -39,7 +39,7 @@ class TestPermissionMatrix(SevenStarsCommon):
         # membership and the §17 guards refuse it — which is the point. Every set-up step
         # here goes through the role that is actually entitled to it.
         order.with_user(self.manager).write({'required_deposit_amount': 5000.0})
-        self.env['seven.stars.payment'].create({'order_id': order.id, 'amount': 5000.0})
+        self._pay(order, 5000.0)
         order.with_user(self.manager).action_confirm_booking()
         return order
 
@@ -178,43 +178,42 @@ class TestPermissionMatrix(SevenStarsCommon):
     # ------------------------------------------------- «استرجاع الأموال»
     def test_a_refund_is_management_only(self):
         order = self._booking([self.hall], *self.evening(2038, 7, 2), user=self.clerk)
-        self.env['seven.stars.payment'].with_user(self.clerk).create({
-            'order_id': order.id, 'amount': 3000.0})
+        self._pay(order, 3000.0, user=self.clerk)
 
         with self.assertRaises(ValidationError):
-            self.env['seven.stars.payment'].with_user(self.clerk).create({
-                'order_id': order.id, 'amount': -1000.0})
+            self._pay(order, 1000.0, user=self.clerk, refund=True)
 
-        refund = self.env['seven.stars.payment'].with_user(self.manager).create({
-            'order_id': order.id, 'amount': -1000.0, 'reference': 'REFUND-1'})
-        self.assertEqual(refund.amount, -1000.0)
+        self._pay(order, 1000.0, user=self.manager, refund=True, memo='REFUND-1')
         self.assertEqual(order.collected_amount, 2000.0,
-                         "a refund is an ordinary row, so one ledger stays the truth")
+                         "a refund is an outbound payment, so one ledger stays the truth")
 
     # ----------------------------------------------------- payments and closing
     def test_a_clerk_and_an_accountant_may_both_record_a_payment(self):
         order = self._booking([self.hall], *self.evening(2038, 8, 6), user=self.clerk)
         for user in (self.clerk, self.accountant):
             with self.subTest(role=user.login):
-                payment = self.env['seven.stars.payment'].with_user(user).create({
-                    'order_id': order.id, 'amount': 1000.0})
-                self.assertTrue(payment.id)
+                self._pay(order, 1000.0, user=user)
+        self.assertEqual(order.collected_amount, 2000.0)
 
-    def test_a_clerk_may_not_delete_a_payment(self):
-        """Money that has arrived is not a clerk's to erase; the accountant corrects it."""
+    def test_a_payment_is_not_the_staff_to_erase_or_edit(self):
+        """It is a posted accounting document now — correcting it is an accounting act, and
+        neither the clerk nor the Seven Stars accountant holds accounting rights."""
         order = self._booking([self.hall], *self.evening(2038, 8, 13), user=self.clerk)
-        payment = self.env['seven.stars.payment'].with_user(self.clerk).create({
-            'order_id': order.id, 'amount': 1000.0})
-        with self.assertRaises(AccessError):
-            payment.with_user(self.clerk).unlink()
-        payment.with_user(self.accountant).unlink()
+        self._pay(order, 1000.0, user=self.clerk)
+        payment = order.payment_ids
+
+        for user in (self.clerk, self.accountant):
+            with self.subTest(role=user.login):
+                with self.assertRaises(AccessError):
+                    payment.with_user(user).unlink()
+                with self.assertRaises(AccessError):
+                    payment.with_user(user).write({'amount': 5.0})
 
     def test_closing_a_booking_is_management_only(self):
         order = self._confirmed(8)
         order.with_user(self.manager).write({'appendix_event_date': '2038-01-08'})
         order.with_user(self.manager).action_mark_ready()
-        self.env['seven.stars.payment'].create({
-            'order_id': order.id, 'amount': order.outstanding_amount})
+        self._pay(order, order.outstanding_amount)
 
         for user in (self.clerk, self.booking_manager):
             with self.subTest(role=user.login), self.assertRaises(ValidationError):
@@ -261,7 +260,7 @@ class TestNoCollateralDamage(SevenStarsCommon):
         cls.product = cls._service("PLAIN Service", 1000.0)
 
     def test_a_plain_salesperson_can_read_a_whole_quotation(self):
-        """`payment_ids` points at seven.stars.payment, and it sits on EVERY sale.order.
+        """`payment_ids` points at account.payment, and it sits on EVERY sale.order.
         Without a read ACL for internal users, reading all fields of any quotation raised
         AccessError and broke four standard `sale` tests."""
         quotation = self.env['sale.order'].with_user(self.plain_user).create({
@@ -277,7 +276,7 @@ class TestNoCollateralDamage(SevenStarsCommon):
             [self._hall("PLAIN Hall", 400, 2500.0).product_variant_id],
             *self.evening(2039, 5, 6))
         with self.assertRaises(AccessError):
-            self.env['seven.stars.payment'].with_user(self.plain_user).create({
+            self.env['ss.payment.register'].with_user(self.plain_user).create({
                 'order_id': booking.id, 'amount': 100.0})
 
     def test_an_ordinary_rental_product_is_not_treated_as_a_hall(self):

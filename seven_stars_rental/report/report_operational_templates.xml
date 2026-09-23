@@ -5,7 +5,7 @@
      form, so the printed sheet matches what the staff already use. -->
 <template id="report_operational_appendix_document">
 <t t-call="web.external_layout">
-            <div class="page">
+            <div class="page o_ss_report">
                 <h2 class="text-center">الملحق التشغيلي ليوم المناسبة</h2>
                 <p class="text-center text-muted">
                     <span t-field="doc.name"/> — <span t-field="doc.partner_id.name"/>
@@ -66,7 +66,7 @@
      No prices: this one is for the floor, not the customer. -->
 <template id="report_event_details_document">
 <t t-call="web.external_layout">
-            <div class="page">
+            <div class="page o_ss_report">
                 <h2 class="text-center">تفاصيل المناسبة — نسخة الموظفين</h2>
 
                 <table class="table table-sm mt-4">

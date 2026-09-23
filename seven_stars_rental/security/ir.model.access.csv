@@ -1,5 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_seven_stars_payment_user,seven.stars.payment read for internal users,model_seven_stars_payment,base.group_user,1,0,0,0
-access_seven_stars_payment_clerk,seven.stars.payment clerk,model_seven_stars_payment,seven_stars_rental.group_ss_clerk,1,1,1,0
-access_seven_stars_payment_accountant,seven.stars.payment accountant,model_seven_stars_payment,seven_stars_rental.group_ss_accountant,1,1,1,1
-access_seven_stars_payment_manager,seven.stars.payment management,model_seven_stars_payment,seven_stars_rental.group_ss_manager,1,1,1,1
+access_ss_payment_register_clerk,ss.payment.register clerk,model_ss_payment_register,seven_stars_rental.group_ss_clerk,1,1,1,1
+access_ss_payment_register_accountant,ss.payment.register accountant,model_ss_payment_register,seven_stars_rental.group_ss_accountant,1,1,1,1
+access_ss_payment_register_manager,ss.payment.register management,model_ss_payment_register,seven_stars_rental.group_ss_manager,1,1,1,1
+access_ss_account_payment_clerk,account.payment read for the booking staff,account.model_account_payment,seven_stars_rental.group_ss_clerk,1,0,0,0
+access_ss_account_payment_accountant,account.payment read for the accountant,account.model_account_payment,seven_stars_rental.group_ss_accountant,1,0,0,0
+access_ss_account_payment_manager,account.payment read for management,account.model_account_payment,seven_stars_rental.group_ss_manager,1,0,0,0

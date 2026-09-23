@@ -6,12 +6,15 @@ date constraint is a single-row SQL CHECK (sale_renting/models/sale_order.py:24)
 structurally unable to compare two rows. The gantt's consolidation_max is 1e9. Availability
 is therefore entirely ours (spec §3.1).
 """
+import base64
 import logging
 from datetime import timedelta
 
-from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo import Command, api, fields, models
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools.pdf import merge_pdf
 
+from .product_template import APPENDIX_ITEMS
 from .res_config_settings import (
     GUEST_TOLERANCE_KEY, SAME_DAY_GAP_KEY, get_optional_float,
 )
@@ -64,25 +67,77 @@ class SaleOrder(models.Model):
     booking_state = fields.Selection(
         BOOKING_STATES, string="حالة الحجز", default='draft', copy=False,
         tracking=True, index=True, required=True)
+    # A wedding is booked in the couple's name, and every contract and floor sheet is read by
+    # staff looking for exactly these two. Kept plain text: they are not customers of the
+    # business — the person who signs and pays is partner_id.
+    groom_name = fields.Char(string="اسم العريس")
+    bride_name = fields.Char(string="اسم العروس")
     internal_note_men = fields.Text(string="ملاحظات داخلية — قاعة الرجال")
     internal_note_women = fields.Text(string="ملاحظات داخلية — قاعة النساء")
 
+    # The four customer details the contracts print. They already live on res.partner and the
+    # contract template already binds them correctly — they printed blank because they sit on
+    # a partner tab nobody opens while taking a booking. Related and writable, so the clerk
+    # fills them here and they land on the customer record.
+    partner_street = fields.Char(
+        related='partner_id.street', string="العنوان", readonly=False)
+    partner_whatsapp = fields.Char(
+        related='partner_id.whatsapp', string="رقم واتساب", readonly=False)
+    partner_id_number = fields.Char(
+        related='partner_id.id_number', string="رقم الهوية", readonly=False)
+    partner_responsible_person = fields.Char(
+        related='partner_id.responsible_person',
+        string="الشخص المسؤول عن المناسبة", readonly=False)
+
+    # Picking a hall here writes the rental line, and the line is the single truth — this
+    # field is a view of it, never a second copy. The price comes from the order's pricelist
+    # because the line is created without one and Odoo computes it; see _inverse_ss_hall_ids.
+    hall_ids = fields.Many2many(
+        'product.product', string="القاعات",
+        compute='_compute_ss_hall_ids', inverse='_inverse_ss_hall_ids',
+        domain=[('product_tmpl_id.hall_capacity', '>', 0)],
+        help="اختيار القاعة يضيفها إلى بنود الطلب بسعرها حسب قائمة أسعار الحجز.")
+
+    # PRD §10 prints three different contracts and a booking can need more than one — a
+    # wedding with a henna night and a lunch. Marked on the report itself (ss_is_contract) so
+    # a fourth contract is a new report, not a code change here.
+    contract_report_ids = fields.Many2many(
+        'ir.actions.report', string="نوع العقد",
+        domain=[('ss_is_contract', '=', True)],
+        help="العقود التي تُطبع لهذا الحجز. يمكن اختيار أكثر من نوع.")
+
     # --------------------------------------------------------------- money (§6.1)
     # required_deposit_amount is a TERM. It is the deposit agreed for this booking, and
-    # nothing has been received because it has a value. Money received exists only as
-    # seven.stars.payment rows; everything below that looks like received money is a stored
-    # compute over those rows, so the two can never drift apart.
+    # nothing has been received because it has a value. Money received exists only as posted
+    # account.payment records; everything below that looks like received money is a stored
+    # compute over those, so the two can never drift apart.
     required_deposit_amount = fields.Monetary(
         string="العربون المطلوب", tracking=True,
         help="The deposit agreed with the customer — a condition of the booking, not a "
              "payment. Money actually received is recorded in the Payments tab.")
-    payment_ids = fields.One2many('seven.stars.payment', 'order_id', string="الدفعات")
+    # ⚠⚠⚠ These three are computed with compute_sudo and are NOT stored, and both facts are
+    # load-bearing.
+    #
+    # They sit on EVERY sale.order, including quotations that have nothing to do with Seven
+    # Stars. A plain One2many to account.payment made Odoo search that model as the reading
+    # user, so a salesperson without accounting rights could no longer read any order at all:
+    # measured as three standard `sale` failures (test_access_sales_person,
+    # test_access_sales_manager, test_credit_limit_access). This is the same trap a field-level
+    # groups= caused here before, and standard Odoo dodges it the same way — sale.order.
+    # invoice_ids is computed, not a relation (sale/models/sale_order.py:239).
+    #
+    # Nothing is stored because a stored compute needs a real relation to depend on, which is
+    # the very thing removed. account.payment invalidates them instead; see its write/create.
+    payment_ids = fields.Many2many(
+        'account.payment', string="الدفعات", copy=False,
+        compute='_compute_ss_payment_ids', compute_sudo=True)
     collected_amount = fields.Monetary(
-        string="المبلغ المدفوع", compute='_compute_ss_amounts', store=True,
-        help="The sum of every payment row. Named collected_amount because sale.order."
-             "amount_paid already exists and counts online payment transactions only.")
+        string="المبلغ المدفوع", compute='_compute_ss_amounts', compute_sudo=True,
+        help="Money actually received: the posted customer payments on this booking, less any "
+             "refund. Named collected_amount because sale.order.amount_paid already exists "
+             "and counts online payment transactions only.")
     outstanding_amount = fields.Monetary(
-        string="المبلغ المتبقي", compute='_compute_ss_amounts', store=True)
+        string="المبلغ المتبقي", compute='_compute_ss_amounts', compute_sudo=True)
     price_approved = fields.Boolean(
         string="اعتماد السعر", tracking=True,
         help="PRD §8/§17. Management approves the price; once approved, a discount above "
@@ -100,10 +155,23 @@ class SaleOrder(models.Model):
     # are fields rather than a child model (spec §22). PRD §10 lists fifteen items; an
     # earlier audit miscounted fourteen.
     appendix_event_date = fields.Date(string="تاريخ المناسبة")
-    appendix_promo_show = fields.Boolean(string="عرض برومو")
-    appendix_dabke_women = fields.Boolean(string="فرقة دبكة (النساء)")
-    appendix_zaffa_groom = fields.Boolean(string="فرقة زفة للعريس")
-    appendix_zaffa_on_screens = fields.Boolean(string="عرض الزفة على الشاشات")
+
+    # The four CHARGEABLE items. Ticking one adds its service to the order lines and unticking
+    # removes it, so the money and the appendix can never disagree — the order line is the
+    # truth and the checkbox is computed from it. The other appendix fields below stay
+    # descriptive: they carry counts and notes, and no price per unit was ever supplied.
+    appendix_promo_show = fields.Boolean(
+        string="عرض برومو",
+        compute='_compute_ss_appendix_items', inverse='_inverse_ss_appendix_items')
+    appendix_dabke_women = fields.Boolean(
+        string="فرقة دبكة (النساء)",
+        compute='_compute_ss_appendix_items', inverse='_inverse_ss_appendix_items')
+    appendix_zaffa_groom = fields.Boolean(
+        string="فرقة زفة للعريس",
+        compute='_compute_ss_appendix_items', inverse='_inverse_ss_appendix_items')
+    appendix_zaffa_on_screens = fields.Boolean(
+        string="عرض الزفة على الشاشات",
+        compute='_compute_ss_appendix_items', inverse='_inverse_ss_appendix_items')
     appendix_lighting = fields.Char(string="نظام الإنارة")
     appendix_hospitality_men = fields.Char(string="ضيافة قاعة الرجال")
     appendix_hospitality_women = fields.Char(string="ضيافة قاعة النساء")
@@ -115,12 +183,143 @@ class SaleOrder(models.Model):
     appendix_photo_studio = fields.Char(string="استوديو التصوير")
     appendix_details = fields.Text(string="التفاصيل")
 
-    @api.depends('payment_ids.amount', 'amount_total')
+    # A payment counts as received once it is posted. Odoo moves a posted payment to
+    # 'in_process' and then to 'paid' when it is matched, so both mean the money is in.
+    SS_RECEIVED_STATES = ('in_process', 'paid')
+
+    def _compute_ss_payment_ids(self):
+        payments = self.env['account.payment']
+        for order in self:
+            origin = order._origin
+            order.payment_ids = payments.search(
+                [('ss_order_id', '=', origin.id)]) if origin.id else payments
+
+    @api.depends('payment_ids', 'amount_total')
     def _compute_ss_amounts(self):
         for order in self:
-            collected = sum(order.payment_ids.mapped('amount'))
+            collected = sum(
+                payment.amount if payment.payment_type == 'inbound' else -payment.amount
+                for payment in order.payment_ids
+                if payment.state in self.SS_RECEIVED_STATES
+            )
             order.collected_amount = collected
             order.outstanding_amount = order.amount_total - collected
+
+    # --------------------------------------------- halls and appendix items as ORDER LINES
+    def _ss_check_lines_editable(self):
+        """Lines may not be added or removed once the booking has been invoiced.
+
+        Changing them afterwards would leave the invoice disagreeing with the contract, and
+        an invoice that is already posted can only be undone with a credit note.
+        """
+        self.ensure_one()
+        if self.invoice_ids.filtered(lambda move: move.state == 'posted'):
+            raise UserError(self.env._(
+                "لا يمكن تعديل القاعات أو بنود الملحق التشغيلي بعد إصدار الفاتورة.\n"
+                "أصدر إشعاراً دائناً أولاً إذا كان التعديل ضرورياً.\n\n"
+                "The booking has a posted invoice, so its lines are fixed. Issue a credit "
+                "note first if the booking really must change."))
+
+    @api.depends('order_line.product_id', 'order_line.is_rental')
+    def _compute_ss_hall_ids(self):
+        for order in self:
+            order.hall_ids = order._ss_hall_products()
+
+    def _inverse_ss_hall_ids(self):
+        """Write the picked halls onto the order as rental lines.
+
+        ⚠⚠⚠ The line is created WITHOUT a price_unit on purpose. Odoo then computes it from
+        the order's pricelist, which is the only thing that keeps halls 3+4 at 14,000 rather
+        than 28,000 — that pair price exists solely as a 0.00 product.pricing row on hall 4 in
+        the wedding pricelists. Never seed this from product.list_price. test_no_double_charging
+        and test_hall_picker_uses_pricelist are the guards.
+        """
+        for order in self:
+            current = order._ss_hall_products()
+            to_add = order.hall_ids - current
+            to_remove = current - order.hall_ids
+            if not to_add and not to_remove:
+                continue
+            order._ss_check_lines_editable()
+            commands = [
+                Command.delete(line.id)
+                for line in order.order_line.filtered(
+                    lambda line: line.is_rental and line.product_id in to_remove)
+            ]
+            commands += [
+                Command.create({
+                    'product_id': hall.id, 'product_uom_qty': 1, 'is_rental': True,
+                })
+                for hall in to_add
+            ]
+            order.order_line = commands
+
+    @api.depends('order_line.product_id')
+    def _compute_ss_appendix_items(self):
+        for order in self:
+            sold = set(order.order_line.product_id.product_tmpl_id.mapped('ss_appendix_item'))
+            for item_key, _label in APPENDIX_ITEMS:
+                order[f'appendix_{item_key}'] = item_key in sold
+
+    def _inverse_ss_appendix_items(self):
+        for order in self:
+            for item_key, label in APPENDIX_ITEMS:
+                order._ss_sync_appendix_line(item_key, label, order[f'appendix_{item_key}'])
+
+    def _ss_sync_appendix_line(self, item_key, label, wanted):
+        """Add or remove the service that sells one appendix item.
+
+        Priced by the pricelist for the same reason as the halls: the line carries no
+        price_unit and Odoo computes it.
+        """
+        self.ensure_one()
+        lines = self.order_line.filtered(
+            lambda line: line.product_id.product_tmpl_id.ss_appendix_item == item_key)
+        if bool(lines) == bool(wanted):
+            return
+        self._ss_check_lines_editable()
+        if not wanted:
+            self.order_line = [Command.delete(line.id) for line in lines]
+            return
+        product = self.env['product.product'].search(
+            [('product_tmpl_id.ss_appendix_item', '=', item_key)], limit=1)
+        if not product:
+            # Silently leaving the box ticked would be a lie: the field is computed from the
+            # lines, so it would flip back to unticked on the next read.
+            raise UserError(self.env._(
+                "لا توجد خدمة مرتبطة بالبند «%(label)s».\n"
+                "افتح الخدمة المطلوبة وحدّد «بند الملحق التشغيلي» عليها أولاً.\n\n"
+                "No service product is tagged with this appendix item. Set «بند الملحق "
+                "التشغيلي» on the service that sells it, then tick the box again.",
+                label=label))
+        self.order_line = [Command.create({'product_id': product.id, 'product_uom_qty': 1})]
+
+    def action_ss_print_contracts(self):
+        """Print every contract type selected on this booking, as one PDF."""
+        self.ensure_one()
+        if not self.contract_report_ids:
+            raise UserError(self.env._(
+                "اختر «نوع العقد» أولاً في تبويب «الحجز».\n\n"
+                "No contract type is selected on this booking."))
+        if len(self.contract_report_ids) == 1:
+            return self.contract_report_ids.report_action(self)
+        streams = [
+            report._render_qweb_pdf(report.report_name, self.ids)[0]
+            for report in self.contract_report_ids
+        ]
+        attachment = self.env['ir.attachment'].create({
+            'name': f"عقود - {self.name}.pdf",
+            'type': 'binary',
+            'datas': base64.b64encode(merge_pdf(streams)),
+            'mimetype': 'application/pdf',
+            'res_model': self._name,
+            'res_id': self.id,
+        })
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'self',
+        }
 
     # ------------------------------------------------------------------ helpers
     def _ss_hall_products(self):
@@ -362,7 +561,58 @@ class SaleOrder(models.Model):
             # PRD steps 11 and 13. Standard mail.activity — no cron, no automated action,
             # no server action anywhere in this addon (spec §13).
             order._ss_schedule_reminders()
+            order._ss_invoice_booking()
         return True
+
+    # ------------------------------------------------------------------ accounting (§1.2)
+    def _ss_invoice_booking(self):
+        """Jamal, 2026-09-23 — «بعد تغيير الحالة الى مؤكد، فوترة اوتوماتيكية على المحاسبة».
+
+        The WHOLE booking is invoiced, not a down payment: the customer's receivable must
+        show what the contract is worth, which is what «الرصيد/الذمة» means. The deposit was
+        taken before this invoice existed, so it is sitting as an unreconciled credit on the
+        customer — _ss_reconcile_payments settles it against this invoice immediately, which
+        is «والدفعات التي تم انشاؤها يتم تسويتها من الفاتورة المصدرة على العقد».
+
+        Runs sudo because the clerk who confirms a booking has no accounting groups by
+        design; the permission question was already answered by CON-03 above.
+        """
+        invoices = self.env['account.move']
+        for order in self:
+            if not order._ss_is_hall_booking():
+                continue
+            order_sudo = order.sudo()
+            invoice = order_sudo.invoice_ids.filtered(lambda move: move.state != 'cancel')
+            if not invoice:
+                if not any(order_sudo.order_line.mapped('qty_to_invoice')):
+                    continue
+                invoice = order_sudo._create_invoices()
+            invoice.filtered(lambda move: move.state == 'draft').action_post()
+            order_sudo._ss_reconcile_payments()
+            invoices |= invoice
+        return invoices
+
+    def _ss_reconcile_payments(self):
+        """Settle every posted payment on this booking against its invoice."""
+        self.ensure_one()
+        order = self.sudo()
+        invoices = order.invoice_ids.filtered(
+            lambda move: move.state == 'posted' and move.move_type == 'out_invoice')
+        payments = order.payment_ids.filtered(
+            lambda payment: payment.state in self.SS_RECEIVED_STATES)
+        if not invoices or not payments:
+            return
+
+        def open_receivables(moves):
+            return moves.line_ids.filtered(
+                lambda line: line.account_id.account_type == 'asset_receivable'
+                and not line.reconciled)
+
+        lines = open_receivables(invoices) | open_receivables(payments.move_id)
+        # Both sides must be present, or reconcile() would pointlessly match an invoice
+        # against itself.
+        if len(lines.mapped('move_id')) > 1:
+            lines.reconcile()
 
     def action_mark_ready(self):
         """BTN-04 — جاهز للمناسبة, guarded by the operational appendix (spec §9.1).

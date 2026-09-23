@@ -18,4 +18,17 @@
         </field>
     </record>
 
+    <!-- The appendix marker belongs on SERVICE products, which are not rentable, so it
+         cannot share the Rental tab above. -->
+    <record id="product_template_form_view_seven_stars_appendix" model="ir.ui.view">
+        <field name="name">product.template.form.seven.stars.appendix</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='list_price']" position="after">
+                <field name="ss_appendix_item"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

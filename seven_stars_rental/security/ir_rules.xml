@@ -14,8 +14,8 @@
 
 <!-- The accountant records money against bookings she did not create, so she needs to SEE
      every booking. Rules within one group are OR-ed, so this widens her read access without
-     granting her any write on the booking itself; her write rights are on
-     seven.stars.payment, through ir.model.access.csv. -->
+     granting her any write on the booking itself; she records money through the
+     ss.payment.register wizard, which writes the payment sudo. -->
 <record id="rule_ss_accountant_reads_every_booking" model="ir.rule">
     <field name="name">Seven Stars: the accountant sees every booking</field>
     <field name="model_id" ref="sale.model_sale_order"/>
@@ -27,12 +27,14 @@
     <field name="perm_unlink" eval="False"/>
 </record>
 
-<!-- A payment belongs to whoever may see its booking. ir.rule permissions all default to
-     True (base/models/ir_rule.py:27-30), so they are stated explicitly here. -->
+<!-- Booking staff read payments, and ONLY the ones that belong to a booking. Without this
+     the read access granted in ir.model.access.csv would expose every payment in the
+     company's accounts. ir.rule permissions all default to True
+     (base/models/ir_rule.py:27-30), so they are stated explicitly here. -->
 <record id="rule_ss_payment_follows_its_booking" model="ir.rule">
     <field name="name">Seven Stars: a payment follows its booking</field>
-    <field name="model_id" ref="model_seven_stars_payment"/>
-    <field name="domain_force">[('order_id', '!=', False)]</field>
+    <field name="model_id" ref="account.model_account_payment"/>
+    <field name="domain_force">[('ss_order_id', '!=', False)]</field>
     <field name="groups" eval="[
         (4, ref('seven_stars_rental.group_ss_clerk')),
         (4, ref('seven_stars_rental.group_ss_accountant')),

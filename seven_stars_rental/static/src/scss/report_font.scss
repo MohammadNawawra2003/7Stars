@@ -1,0 +1,17 @@
+// «تغيير نوع الخط» — Jamal, 2026-09-23.
+//
+// Tajawal, because Odoo already ships it: web/static/fonts/google/Tajawal, with its
+// @font-face declared by web/static/fonts/fonts.scss which is ALREADY part of the
+// web.report_assets_common bundle these documents render with. So no font file is added to
+// this addon, nothing is downloaded at render time, and the face is guaranteed to exist on
+// Odoo.sh — a Google Fonts <link> would simply not resolve inside wkhtmltopdf.
+//
+// Scoped to the Seven Stars documents on purpose: every .page in the database, invoices
+// included, is not this addon's to restyle.
+.o_ss_report {
+    font-family: 'Tajawal', 'Noto Naskh Arabic', sans-serif;
+
+    h2, h3, h4, strong, th {
+        font-weight: 700;
+    }
+}

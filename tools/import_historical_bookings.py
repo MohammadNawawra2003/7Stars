@@ -156,12 +156,19 @@ def import_rows(env, rows, conflicts):
                                    'product_uom_qty': 1, 'is_rental': True})],
         })
         if float(row.get('collected') or 0.0):
-            env['seven.stars.payment'].create({
-                'order_id': order.id,
+            # Historical money is booked as a real, posted payment like any other. It is NOT
+            # reconciled here: these bookings predate the system and carry no invoice.
+            payment = env['account.payment'].create({
+                'ss_order_id': order.id,
+                'partner_id': order.partner_id.id,
+                'partner_type': 'customer',
+                'payment_type': 'inbound',
                 'amount': float(row['collected']),
-                'method': 'cash',
-                'reference': f"HISTORICAL-{row['ref']}",
+                'journal_id': env['account.journal'].search(
+                    [('type', '=', 'cash')], limit=1).id,
+                'memo': f"HISTORICAL-{row['ref']}",
             })
+            payment.action_post()
         created.append((row['ref'], order.name))
     return created, skipped
 

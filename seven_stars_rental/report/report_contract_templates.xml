@@ -51,7 +51,7 @@
 <!-- The shared base. `contract_title` and `variant` are supplied by each caller. -->
 <template id="report_contract_base">
     <t t-call="web.external_layout">
-        <div class="page">
+        <div class="page o_ss_report">
             <h2 class="text-center" t-out="contract_title"/>
             <p class="text-center text-muted" t-field="doc.name"/>
 
@@ -73,6 +73,18 @@
                     <td><span t-field="doc.partner_id.responsible_person"/></td>
                     <td><strong>نوع المناسبة</strong></td>
                     <td><span t-field="doc.event_type"/></td>
+                </tr>
+                <tr>
+                    <td><strong>العنوان</strong></td>
+                    <td><span t-field="doc.partner_id.street"/></td>
+                    <td><strong>المدينة</strong></td>
+                    <td><span t-field="doc.partner_id.city"/></td>
+                </tr>
+                <tr t-if="doc.groom_name or doc.bride_name">
+                    <td><strong>اسم العريس</strong></td>
+                    <td><span t-field="doc.groom_name"/></td>
+                    <td><strong>اسم العروس</strong></td>
+                    <td><span t-field="doc.bride_name"/></td>
                 </tr>
                 <tr>
                     <td><strong>من</strong></td>

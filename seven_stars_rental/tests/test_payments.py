@@ -1,7 +1,10 @@
 """Money (spec §6, §6.1) — CON-03 and CON-04.
 
-seven.stars.payment rows are the only record of money actually received. Everything on the
-booking that looks like received money is a stored compute over them.
+Posted account.payment records are the only record of money actually received. Everything on
+the booking that looks like received money is a stored compute over them.
+
+Since 2026-09-23 the money is real accounting: confirming a booking posts the contract's
+invoice and settles the payments already taken against it (Jamal's round-1 feedback).
 """
 from odoo import Command
 from odoo.exceptions import ValidationError
@@ -20,12 +23,6 @@ class TestPayments(SevenStarsCommon):
         cls.clerk = cls._user('test_pay_clerk', 'group_ss_clerk')
         cls.manager = cls._user('test_pay_manager', 'group_ss_manager')
 
-    def _pay(self, order, amount, method='cash', reference=False):
-        return self.env['seven.stars.payment'].create({
-            'order_id': order.id, 'amount': amount,
-            'method': method, 'reference': reference,
-        })
-
     # ------------------------------------------------------------- the computes
     def test_collected_and_outstanding_follow_the_payment_rows(self):
         order = self._booking([self.hall], *self.evening(2032, 3, 5))
@@ -37,7 +34,7 @@ class TestPayments(SevenStarsCommon):
         self.assertEqual(order.collected_amount, 3000.0)
         self.assertEqual(order.outstanding_amount, 11000.0)
 
-        self._pay(order, 5000.0, method='transfer', reference='TRF-1')
+        self._pay(order, 5000.0, transfer=True, memo='TRF-1')
         self.assertEqual(order.collected_amount, 8000.0)
         self.assertEqual(order.outstanding_amount, 6000.0)
 
@@ -46,18 +43,21 @@ class TestPayments(SevenStarsCommon):
         self.assertEqual(order.outstanding_amount, 0.0,
                          "the balance has to reach exactly zero, not almost zero")
 
-    def test_removing_a_payment_row_moves_the_balance_back(self):
-        """Proves the direction of truth: the rows drive the totals, never the reverse."""
+    def test_cancelling_a_payment_moves_the_balance_back(self):
+        """Proves the direction of truth: the payments drive the totals, never the reverse.
+
+        A posted payment is cancelled rather than deleted — it is an accounting document now.
+        """
         order = self._booking([self.hall], *self.evening(2032, 3, 12))
-        first = self._pay(order, 3000.0)
+        self._pay(order, 3000.0)
         self._pay(order, 2000.0)
         self.assertEqual(order.collected_amount, 5000.0)
 
-        first.unlink()
+        order.payment_ids.sorted('id')[0].sudo().action_cancel()
         self.assertEqual(order.collected_amount, 2000.0)
         self.assertEqual(order.outstanding_amount, 12000.0)
 
-    def test_no_received_money_is_stored_outside_seven_stars_payment(self):
+    def test_no_received_money_is_stored_outside_the_payments(self):
         """required_deposit_amount is a TERM. Setting it must move nothing (spec §6.1)."""
         order = self._booking([self.hall], *self.evening(2032, 3, 19))
         order.required_deposit_amount = 3000.0
@@ -124,22 +124,76 @@ class TestPayments(SevenStarsCommon):
         order.action_close_booking()
         self.assertEqual(order.booking_state, 'completed')
 
-    # ------------------------------------------------------------ no accounting
-    def test_a_whole_booking_creates_no_accounting_document(self):
-        """The workflow implements no accounting (spec §1.2). The modules exist only because
-        sale_renting -> sale -> account_payment -> account requires them."""
-        moves_before = self.env['account.move'].search_count([])
-        payments_before = self.env['account.payment'].search_count([])
+    # -------------------------------------------------------------- the accounting
+    # «بعد تغيير الحالة الى مؤكد — فوترة اوتوماتيكية على المحاسبة، والدفعات التي تم انشاؤها
+    #  يتم تسويتها من الفاتورة المصدرة على العقد»  — Jamal, 2026-09-23.
+    def test_a_payment_is_a_posted_accounting_document(self):
+        order = self._booking([self.hall], *self.evening(2032, 6, 4))
+        self._pay(order, 3000.0)
 
-        order = self._booking([self.hall], *self.evening(2032, 6, 4),
-                              required_deposit_amount=3000.0)
+        payment = order.payment_ids
+        self.assertEqual(len(payment), 1)
+        self.assertIn(payment.state, ('in_process', 'paid'))
+        self.assertTrue(payment.move_id, "a payment must reach the general ledger")
+        self.assertEqual(payment.move_id.state, 'posted')
+
+    def test_confirming_a_booking_invoices_it_automatically(self):
+        order = self._booking([self.hall], *self.evening(2032, 6, 11),
+                              required_deposit_amount=3000.0, booking_state='awaiting')
+        self._pay(order, 3000.0)
+        self.assertFalse(order.invoice_ids, "nothing is invoiced before «مؤكد»")
+
+        order.action_confirm_booking()
+
+        invoice = order.invoice_ids
+        self.assertEqual(len(invoice), 1, "one invoice for the contract")
+        self.assertEqual(invoice.state, 'posted')
+        self.assertEqual(invoice.amount_total, order.amount_total,
+                         "the WHOLE contract is invoiced, not just the deposit")
+
+    def test_the_deposit_is_settled_from_the_contract_invoice(self):
+        """The deposit arrives before the invoice exists, so it waits as an outstanding
+        credit on the customer and is reconciled the moment the invoice is posted."""
+        order = self._booking([self.hall], *self.evening(2032, 6, 18),
+                              required_deposit_amount=3000.0, booking_state='awaiting')
         self._pay(order, 3000.0)
         order.action_confirm_booking()
-        order.appendix_event_date = order.rental_start_date.date()
-        order.action_mark_ready()
-        self._pay(order, 11000.0)
-        order.action_close_booking()
 
-        self.assertEqual(self.env['account.move'].search_count([]), moves_before)
-        self.assertEqual(self.env['account.payment'].search_count([]), payments_before)
-        self.assertFalse(order.invoice_ids)
+        invoice = order.invoice_ids
+        self.assertEqual(invoice.amount_residual, 11000.0,
+                         "14,000 invoiced less the 3,000 deposit already taken")
+        self.assertTrue(order.payment_ids.move_id.line_ids.filtered('reconciled'))
+
+    def test_the_balance_reaches_the_customer_receivable(self):
+        """«وعلى الرصيد الذمة» — what the customer owes is visible on their account."""
+        order = self._booking([self.hall], *self.evening(2032, 6, 25),
+                              required_deposit_amount=3000.0, booking_state='awaiting')
+        self._pay(order, 3000.0)
+        order.action_confirm_booking()
+
+        receivable = self.env['account.move.line'].search([
+            ('partner_id', '=', order.partner_id.id),
+            ('account_id.account_type', '=', 'asset_receivable'),
+            ('parent_state', '=', 'posted'),
+        ])
+        self.assertEqual(sum(receivable.mapped('amount_residual')), 11000.0)
+
+    def test_paying_the_rest_clears_the_invoice(self):
+        order = self._booking([self.hall], *self.evening(2032, 7, 2),
+                              required_deposit_amount=3000.0, booking_state='awaiting')
+        self._pay(order, 3000.0)
+        order.action_confirm_booking()
+        self._pay(order, 11000.0)
+
+        self.assertEqual(order.outstanding_amount, 0.0)
+        self.assertEqual(order.invoice_ids.amount_residual, 0.0)
+        self.assertEqual(order.invoice_ids.payment_state, 'paid')
+
+    def test_confirming_twice_raises_only_one_invoice(self):
+        order = self._booking([self.hall], *self.evening(2032, 7, 9),
+                              required_deposit_amount=3000.0, booking_state='awaiting')
+        self._pay(order, 3000.0)
+        order.action_confirm_booking()
+        order._ss_invoice_booking()
+
+        self.assertEqual(len(order.invoice_ids), 1)

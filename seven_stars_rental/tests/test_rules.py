@@ -240,7 +240,7 @@ class TestCapacityAndHallLock(SevenStarsCommon):
         """«هل يمكن تغيير القاعة بعد التأكيد؟ لا» (spec §23.1)."""
         order = self._booking([self.v_men], *self.evening(2037, 3, 5),
                               required_deposit_amount=3000.0)
-        self.env['seven.stars.payment'].create({'order_id': order.id, 'amount': 3000.0})
+        self._pay(order, 3000.0)
         order.action_confirm_booking()
 
         with self.assertRaises(ValidationError):
@@ -251,7 +251,7 @@ class TestCapacityAndHallLock(SevenStarsCommon):
         """Postponement is exactly that, and CON-01 re-checks the new dates."""
         order = self._booking([self.v_men], *self.evening(2037, 4, 2),
                               required_deposit_amount=3000.0)
-        self.env['seven.stars.payment'].create({'order_id': order.id, 'amount': 3000.0})
+        self._pay(order, 3000.0)
         order.action_confirm_booking()
 
         order.write({
@@ -279,7 +279,7 @@ class TestReminders(SevenStarsCommon):
     def test_confirming_schedules_the_appendix_and_inspection_reminders(self):
         order = self._booking([self.hall], *self.evening(2037, 7, 9),
                               required_deposit_amount=3000.0)
-        self.env['seven.stars.payment'].create({'order_id': order.id, 'amount': 3000.0})
+        self._pay(order, 3000.0)
         self.assertFalse(order.activity_ids)
 
         order.action_confirm_booking()
@@ -296,7 +296,7 @@ class TestReminders(SevenStarsCommon):
     def test_confirming_twice_does_not_duplicate_the_reminders(self):
         order = self._booking([self.hall], *self.evening(2037, 8, 6),
                               required_deposit_amount=3000.0)
-        self.env['seven.stars.payment'].create({'order_id': order.id, 'amount': 3000.0})
+        self._pay(order, 3000.0)
         order.action_confirm_booking()
         order.action_confirm_booking()
         self.assertEqual(len(order.activity_ids), 2)

@@ -73,6 +73,29 @@ class SevenStarsCommon(TransactionCase):
             model = model.with_user(user)
         return model.create(vals)
 
+    def _pay(self, order, amount, user=None, refund=False, **values):
+        """Take money on a booking, the way the UI does — through the wizard.
+
+        Money is a posted account.payment since 2026-09-23, so a test that pokes a row into
+        a table would no longer be testing the real path.
+        """
+        journal_type = 'bank' if values.pop('transfer', False) else 'cash'
+        wizard = self.env['ss.payment.register']
+        if user:
+            wizard = wizard.with_user(user)
+        vals = {
+            'order_id': order.id,
+            'amount': amount,
+            'is_refund': refund,
+            'journal_id': (
+                self.env['account.journal'].search([('type', '=', journal_type)], limit=1)
+                or self.env['account.journal'].search(
+                    [('type', 'in', ('cash', 'bank'))], limit=1)).id,
+        }
+        vals.update(values)
+        wizard.create(vals).action_register()
+        return order.payment_ids
+
     @staticmethod
     def evening(year, month, day):
         return (datetime(year, month, day, 18, 0), datetime(year, month, day, 23, 0))

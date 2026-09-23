@@ -22,7 +22,7 @@ class TestBookingLifecycle(SevenStarsCommon):
     def _paid_booking(self, day, amount=14000.0, deposit=3000.0):
         order = self._booking([self.hall], *self.evening(2033, 1, day),
                               required_deposit_amount=deposit)
-        self.env['seven.stars.payment'].create({'order_id': order.id, 'amount': amount})
+        self._pay(order, amount)
         return order
 
     def test_the_full_eight_state_walk(self):

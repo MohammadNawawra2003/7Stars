@@ -31,31 +31,63 @@ change: **a wedding books hall 3 AND hall 4 for 14,000 total — never 28,000.**
 | Dependencies | `['sale_renting']` — one entry |
 | Central model | `sale.order` with `is_rental_order = True`. No new central model. |
 | Main screen | Rental ▸ Orders ▸ Orders, the standard form plus one inherit |
-| Custom models | **1** (`seven.stars.payment`) |
-| Custom fields | **41** |
-| Custom buttons | **7** |
+| Custom models | **1**, and it is transient: `ss.payment.register`. No persistent custom model remains. |
+| Custom fields | **46** |
+| Custom buttons | **8** |
 | Reports | **8** |
 | Security groups | **4** |
 
-Every count matches the specification. This extends Odoo Rental: it is not a replacement
-rental engine, there is no generic booking framework, no custom accounting, no duplicate
-payment truth and no abstraction layer.
+This extends Odoo Rental: it is not a replacement rental engine, there is no generic booking
+framework, no custom accounting engine, no duplicate payment truth and no abstraction layer.
+The counts moved on 2026-09-23 with Jamal's round-1 feedback; §2 and §3 state the new ones.
 
-**Accounting position.** The accounting modules are installed only because
-`sale_renting → sale → account_payment → account` requires them. This workflow implements no
-accounting: no customer invoice and no account payment is ever created, and the invoice
-buttons are hidden on rental orders. Asserted by a test that walks a complete booking and
-checks `account.move` and `account.payment` counts are unchanged.
+**Accounting position — REVERSED on 2026-09-23 (Jamal, feedback round 1).**
+
+> بعد تغيير الحالة الى مؤكد — فوترة اوتوماتيكية على المحاسبة، والدفعات التي تم انشاؤها يتم
+> تسويتها من الفاتورة المصدرة على العقد
+
+The workflow now does real accounting:
+
+- Money is a posted `account.payment`, taken through the «تسجيل دفعة» wizard at any stage.
+- Reaching «مؤكد» posts the invoice for the **whole** contract, automatically, and settles
+  every payment already taken against it. The customer's receivable therefore shows what the
+  booking is worth — «وعلى الرصيد الذمة».
+- The custom `seven.stars.payment` ledger is **deleted**, not mirrored. Two records of the
+  same money is the duplicate truth this specification forbids.
+- The manual invoice buttons stay hidden on rental orders: invoicing is automatic, and
+  pressing them would raise a second invoice. The invoice is reached from the standard
+  Invoices smart button.
+- Halls and services still carry **no tax**, so every agreed total is unchanged — the
+  wedding pair still invoices at exactly 14,000. If VAT is ever switched on it must be a
+  **price-included** tax, or every price the client agreed moves.
+
+This is NOT the full accounting programme of PRD §22 item 21 (hall costs, expenses, supplier
+and staff wages, profit), which remains out of scope. It also contradicts the signed PRD §21
+and the client's own «هل يجب إصدار فاتورة؟ **لا**» — recorded here because it was Jamal's
+decision to reverse, not an oversight.
+
+⚠ **Deployment note.** A booking cannot be invoiced on a company with no chart of accounts.
+Every existing database has one; a brand-new one does not have it during install, because
+Odoo applies the chart in `_register_hook`, after all module data. The starter dataset calls
+`res.company._ss_ensure_accounting()` for that reason. On a live database also confirm the
+company **currency is ILS** and its **country is فلسطين** — a fresh Odoo defaults to the
+United States, which is why staging S00033 printed «الولايات المتحدة» on its contract.
 
 ### Models inherited
 
 `sale.order` · `sale.order.line` · `product.template` · `res.partner` · `res.config.settings`
+`account.payment` · `res.company` · `ir.actions.report`
 
 ### The one custom model
 
-`seven.stars.payment` — 6 fields (`order_id`, `date`, `amount`, `currency_id`, `method`,
-`reference`). PRD §13 needs a payment statement and a per-payment receipt, so this is a
-genuine one-to-many history. It is the **only** source of truth for money actually received.
+`ss.payment.register` — a **transient** wizard, «تسجيل دفعة». Odoo's own
+`account.payment.register` starts from an invoice, and a booking takes its deposit long
+before it is invoiced. The wizard also keeps clerks out of accounting: it checks the Seven
+Stars permission and writes the payment `sudo`, so no Seven Stars role needs an accounting
+group.
+
+The former `seven.stars.payment` model is **gone**. Money is `account.payment`, whose journal
+carries the method — a cash journal for نقداً, a bank journal for حوالة بنكية.
 
 ---
 
@@ -63,11 +95,12 @@ genuine one-to-many history. It is the **only** source of truth for money actual
 
 | Model | Count | Fields |
 |---|---|---|
-| `sale.order` | 25 | `event_type`, `guest_count`, `booking_state`, `internal_note_men`, `internal_note_women`, `required_deposit_amount`, `payment_ids`, `collected_amount`, `outstanding_amount`, `price_approved`, and the 15 `appendix_*` fields |
-| `product.template` | 3 | `hall_capacity`, `prep_time` (4h), `cleanup_time` (5h) |
+| `sale.order` | 33 | `event_type`, `guest_count`, `booking_state`, `groom_name`, `bride_name`, `internal_note_men`, `internal_note_women`, `required_deposit_amount`, `payment_ids`, `collected_amount`, `outstanding_amount`, `price_approved`, `hall_ids`, `contract_report_ids`, the four `partner_*` related details the contracts print, and the 15 `appendix_*` fields |
+| `product.template` | 4 | `hall_capacity`, `prep_time` (4h), `cleanup_time` (5h), `ss_appendix_item` |
 | `res.partner` | 3 | `id_number`, `whatsapp`, `responsible_person` |
 | `res.config.settings` | 4 | `same_day_gap_mode/_hours`, `guest_tolerance_mode/_percent` |
-| `seven.stars.payment` | 6 | see above |
+| `account.payment` | 1 | `ss_order_id` — the booking a payment was received for, set before any invoice exists |
+| `ir.actions.report` | 1 | `ss_is_contract` — marks a report as a bookable contract type, so a fourth contract is data, not code |
 
 Names checked against standard Odoo before use: `amount_paid` already exists on `sale.order`
 and means online payment-transaction total, so money received is `collected_amount`.
@@ -433,11 +466,11 @@ that are not ours.
 | PRD §22 item 6 — same-day gap | Ships UNSET |
 | PRD §22 item 11 — guest tolerance | Ships UNSET; the question largely dissolved once capacities are summed |
 | Which days count as midweek | Ships UNSET |
-| PRD §22 item 16 — contract wording | Placeholder block |
+| PRD §22 item 16 — contract wording | Placeholder block. **Still open** — the paper originals «المبعوت» have never been supplied, so no wording has been invented |
 | Is hall 4 ever rented alone, and at what price | On a wedding pricelist it prices 0.00 by design; booked alone it must use an ordinary pricelist |
 | What makes the operational appendix "complete" | Only the event date is enforced today |
 | PRD §22 items 18/19 — migration volume | The real import is pending |
-| PRD §22 item 21 — full accounting | Commercial decision; the PRD excludes it |
+| PRD §22 item 21 — full accounting | Invoicing and payments DELIVERED 2026-09-23 (Jamal). Costs, expenses, wages and profit remain out of scope |
 | WhatsApp / SMS notifications | Commercial decision; the PRD excludes them |
 
 ---

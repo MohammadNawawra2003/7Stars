@@ -4,7 +4,7 @@
 <!-- RPT-05 · تأكيد الحجز -->
 <template id="report_booking_confirmation_document">
 <t t-call="web.external_layout">
-            <div class="page">
+            <div class="page o_ss_report">
                 <h2 class="text-center">تأكيد حجز</h2>
                 <p class="text-center text-muted" t-field="doc.name"/>
 
@@ -52,7 +52,7 @@
      model and not a set of fields (spec §6). -->
 <template id="report_payment_statement_document">
 <t t-call="web.external_layout">
-            <div class="page">
+            <div class="page o_ss_report">
                 <h2 class="text-center">كشف الدفعات</h2>
                 <p class="text-center text-muted">
                     <span t-field="doc.name"/> — <span t-field="doc.partner_id.name"/>
@@ -68,8 +68,8 @@
                     <tbody>
                         <tr t-foreach="doc.payment_ids.sorted('date')" t-as="payment">
                             <td><span t-field="payment.date"/></td>
-                            <td><span t-field="payment.method"/></td>
-                            <td><span t-field="payment.reference"/></td>
+                            <td><span t-field="payment.journal_id"/></td>
+                            <td><span t-field="payment.memo"/></td>
                             <td class="text-end">
                                 <span t-field="payment.amount"
                                       t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
@@ -115,21 +115,21 @@
 </template>
 
 <!-- RPT-07 · إيصال الدفع — one receipt for ONE payment, so this report is bound to
-     seven.stars.payment. Printing it from the booking would produce every receipt at once,
+     account.payment. Printing it from the booking would produce every receipt at once,
      which is not what a receipt is. -->
 <template id="report_payment_receipt_document">
 <t t-call="web.external_layout">
-            <div class="page">
+            <div class="page o_ss_report">
                 <h2 class="text-center">إيصال دفع</h2>
 
                 <table class="table table-sm mt-4">
                     <tr><td style="width:30%"><strong>الحجز</strong></td>
-                        <td><span t-field="doc.order_id.name"/></td></tr>
+                        <td><span t-field="doc.ss_order_id.name"/></td></tr>
                     <tr><td><strong>العميل</strong></td>
-                        <td><span t-field="doc.order_id.partner_id.name"/></td></tr>
+                        <td><span t-field="doc.ss_order_id.partner_id.name"/></td></tr>
                     <tr><td><strong>التاريخ</strong></td><td><span t-field="doc.date"/></td></tr>
-                    <tr><td><strong>طريقة الدفع</strong></td><td><span t-field="doc.method"/></td></tr>
-                    <tr><td><strong>المرجع</strong></td><td><span t-field="doc.reference"/></td></tr>
+                    <tr><td><strong>طريقة الدفع</strong></td><td><span t-field="doc.journal_id"/></td></tr>
+                    <tr><td><strong>المرجع</strong></td><td><span t-field="doc.memo"/></td></tr>
                     <tr><td><strong>المبلغ المستلم</strong></td>
                         <td><h4><span t-field="doc.amount"
                             t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></h4></td></tr>
@@ -137,13 +137,13 @@
 
                 <table class="table table-sm w-50 ms-auto mt-4">
                     <tr><td>إجمالي الحجز</td>
-                        <td class="text-end"><span t-field="doc.order_id.amount_total"
+                        <td class="text-end"><span t-field="doc.ss_order_id.amount_total"
                             t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
                     <tr><td>إجمالي المدفوع</td>
-                        <td class="text-end"><span t-field="doc.order_id.collected_amount"
+                        <td class="text-end"><span t-field="doc.ss_order_id.collected_amount"
                             t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
                     <tr><td><strong>المتبقي</strong></td>
-                        <td class="text-end"><span t-field="doc.order_id.outstanding_amount"
+                        <td class="text-end"><span t-field="doc.ss_order_id.outstanding_amount"
                             t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></td></tr>
                 </table>
 

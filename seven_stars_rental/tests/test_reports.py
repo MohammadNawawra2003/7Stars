@@ -67,10 +67,23 @@ class TestReports(SevenStarsCommon):
                 Command.create({'display_type': 'line_note', 'name': "— تصوير فوتوغرافي"}),
             ],
         })
-        cls.payment = cls.env['seven.stars.payment'].create({
-            'order_id': cls.booking.id, 'amount': 3000.0,
-            'method': 'cash', 'reference': 'REC-TEST-1',
+        cls.payment = cls._post_payment(cls.booking, 3000.0, 'cash', 'REC-TEST-1')
+
+    @classmethod
+    def _post_payment(cls, order, amount, journal_type, memo):
+        """Money is a posted account.payment since 2026-09-23."""
+        payment = cls.env['account.payment'].create({
+            'ss_order_id': order.id,
+            'partner_id': order.partner_id.id,
+            'partner_type': 'customer',
+            'payment_type': 'inbound',
+            'amount': amount,
+            'journal_id': cls.env['account.journal'].search(
+                [('type', '=', journal_type)], limit=1).id,
+            'memo': memo,
         })
+        payment.action_post()
+        return payment
 
     def _html(self, xmlid, record):
         report = self.env.ref(f'seven_stars_rental.{xmlid}')
@@ -96,7 +109,9 @@ class TestReports(SevenStarsCommon):
         html = self._html('action_report_hall_contract', self.booking)
         self.assertIn(self.hall_men.name, html)
         self.assertIn(self.hall_women.name, html, "the women's hall belongs on the contract")
-        self.assertEqual(self.booking.amount_total, 15500.0)
+        # 14,000 for the pair + 1,500 photography + the two appendix items this fixture ticks
+        # (عرض برومو 500, فرقة دبكة 1,200), which are now order lines rather than bare flags.
+        self.assertEqual(self.booking.amount_total, 17200.0)
         self.assertNotIn('28,000', html)
         self.assertNotIn('29,000', html)
 
@@ -123,9 +138,7 @@ class TestReports(SevenStarsCommon):
             self.assertIn(label, html, f"the appendix is missing «{label}»")
 
     def test_the_payment_statement_lists_every_payment_row(self):
-        self.env['seven.stars.payment'].create({
-            'order_id': self.booking.id, 'amount': 2000.0,
-            'method': 'transfer', 'reference': 'TRF-TEST-2'})
+        self._post_payment(self.booking, 2000.0, 'bank', 'TRF-TEST-2')
         html = self._html('action_report_payment_statement', self.booking)
         self.assertIn('REC-TEST-1', html)
         self.assertIn('TRF-TEST-2', html)

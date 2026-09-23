@@ -170,7 +170,7 @@ class TestDemoData(TransactionCase):
     def test_services_and_packages_exist(self):
         services = self.env['product.template'].search([('default_code', 'like', 'SS-SRV-')])
         packages = self.env['product.template'].search([('default_code', 'like', 'SS-PKG-')])
-        self.assertEqual(len(services), 10)
+        self.assertEqual(len(services), 11)
         self.assertEqual(len(packages), 3)
 
 

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ss_payment_register_form" model="ir.ui.view">
+        <field name="name">ss.payment.register.form</field>
+        <field name="model">ss.payment.register</field>
+        <field name="arch" type="xml">
+            <form string="تسجيل دفعة">
+                <group>
+                    <group>
+                        <field name="order_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="amount"/>
+                        <field name="date"/>
+                    </group>
+                    <group>
+                        <field name="journal_id" options="{'no_create': True}"/>
+                        <field name="memo"/>
+                        <field name="outstanding_amount" readonly="1"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="is_refund"
+                           groups="seven_stars_rental.group_ss_manager"/>
+                </group>
+                <footer>
+                    <button string="تسجيل" name="action_register" type="object"
+                            class="btn-primary" data-hotkey="q"/>
+                    <button string="إلغاء" class="btn-secondary" special="cancel"
+                            data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ss_payment_register" model="ir.actions.act_window">
+        <field name="name">تسجيل دفعة</field>
+        <field name="res_model">ss.payment.register</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">form</field>
+    </record>
+
+</odoo>

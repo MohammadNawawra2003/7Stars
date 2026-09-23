@@ -9,6 +9,11 @@
         <field name="name">قاعات سفن ستارز — Seven Stars Halls</field>
         <field name="street">الولجة</field>
         <field name="city">بيت لحم</field>
+        <!-- Without this the letterhead on every printed contract reads «الولايات المتحدة»,
+             which is the country a fresh Odoo database defaults to. Spotted on staging
+             S00033. On a live database this is a one-off setting, not something a dataset
+             can reach — see the deployment note in the implementation document. -->
+        <field name="country_id" ref="base.ps"/>
         <field name="phone">+970 2 000 0000</field>
         <field name="email">info@sevenstars.example</field>
     </record>

@@ -12,17 +12,22 @@
         'security/ir_rules.xml',
         'data/ss_base_data.xml',
         'data/ss_pricelist_data.xml',
+        'wizard/ss_payment_register_views.xml',   # the booking form links to it
         'views/sale_order_views.xml',
         'views/product_template_views.xml',
         'views/res_partner_views.xml',
         'views/res_config_settings_views.xml',
-        'views/seven_stars_payment_views.xml',
         'report/report_contract_templates.xml',
         'report/report_operational_templates.xml',
         'report/report_payment_templates.xml',
         'report/report_actions.xml',
         'views/seven_stars_menus.xml',        # menus last, per Odoo convention
     ],
+    'assets': {
+        'web.report_assets_common': [
+            'seven_stars_rental/static/src/scss/report_font.scss',
+        ],
+    },
     'installable': True,
     'application': True,            # one app carrying the whole booking workflow
 }

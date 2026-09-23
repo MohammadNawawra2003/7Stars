@@ -110,6 +110,7 @@
         <field name="type">service</field>
         <field name="categ_id" ref="product_category_service"/>
         <field name="list_price" eval="1200.0"/>
+        <field name="ss_appendix_item">dabke_women</field>
         <field name="taxes_id" eval="[(6, 0, [])]"/>
     </record>
     <record id="service_003" model="product.template">
@@ -118,6 +119,7 @@
         <field name="type">service</field>
         <field name="categ_id" ref="product_category_service"/>
         <field name="list_price" eval="1000.0"/>
+        <field name="ss_appendix_item">zaffa_groom</field>
         <field name="taxes_id" eval="[(6, 0, [])]"/>
     </record>
     <record id="service_004" model="product.template">
@@ -134,6 +136,7 @@
         <field name="type">service</field>
         <field name="categ_id" ref="product_category_service"/>
         <field name="list_price" eval="500.0"/>
+        <field name="ss_appendix_item">promo_show</field>
         <field name="taxes_id" eval="[(6, 0, [])]"/>
     </record>
     <record id="service_006" model="product.template">
@@ -174,6 +177,15 @@
         <field name="type">service</field>
         <field name="categ_id" ref="product_category_service"/>
         <field name="list_price" eval="900.0"/>
+        <field name="taxes_id" eval="[(6, 0, [])]"/>
+    </record>
+    <record id="service_011" model="product.template">
+        <field name="name">عرض الزفة على الشاشات</field>
+        <field name="default_code">SS-SRV-011</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="product_category_service"/>
+        <field name="list_price" eval="400.0"/>
+        <field name="ss_appendix_item">zaffa_on_screens</field>
         <field name="taxes_id" eval="[(6, 0, [])]"/>
     </record>
 

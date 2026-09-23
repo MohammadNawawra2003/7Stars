@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Payment history. Every shekel that arrives is one row here and nowhere else — this
-         is the only source of truth for money actually received (spec §6.1). collected_amount
-         and outstanding_amount on the booking are stored computes over these rows, so the
-         two can never drift apart, and no "is this the deposit?" flag exists: the deposit is
-         simply the first payment, and the confirmation gate only ever asks how much has
-         arrived in total.
+    <!-- Payment history, as real accounting. Jamal, 2026-09-23: payments post to the books,
+         land on the customer's receivable, and are settled from the contract's invoice.
+
+         Each row is an account.payment. The journal carries the method — a cash journal for
+         نقداً, a bank journal for حوالة بنكية — so no parallel "method" field exists.
+         collected_amount and outstanding_amount on the booking are stored computes over
+         these, so the two can never drift apart.
 
          Deliberate coverage:
            completed bookings  balance driven to exactly 0.00
@@ -14,223 +15,339 @@
            confirmed bookings  deposit received, balance still open
            awaiting bookings   NO rows at all — that is what "awaiting the deposit" means
            tentative / draft   no money has been discussed yet
+
+         ⚠ A payment only counts once POSTED, and a booking only owes money once INVOICED,
+         so both happen below. action_post and _ss_invoice_booking are not @api.model, so
+         the first eval argument is consumed as the recordset ids — which is exactly what is
+         wanted here, and why neither call passes anything else.
     -->
-    <record id="payment_001_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_001"/>
+    <!-- A brand new database has no chart of accounts while module data loads — Odoo applies
+         it only in _register_hook, after every module. Without this there are no journals and
+         no receivable account, and not one payment below could be created. A no-op on every
+         database that already has a chart, which is all of them after the first build. -->
+    <function model="res.company" name="_ss_ensure_accounting" eval="[]"/>
+
+    <!-- Odoo's default chart ships a bank journal but no cash journal, and a hall takes
+         most of its money in cash. -->
+    <record id="journal_cash" model="account.journal">
+        <field name="name">النقدية</field>
+        <field name="code">CSH</field>
+        <field name="type">cash</field>
+    </record>
+
+    <record id="payment_001_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_001"/>
+        <field name="partner_id" ref="partner_customer_001"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2025-12-10</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2025-001</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2025-001</field>
     </record>
-    <record id="payment_001_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_001"/>
+    <record id="payment_001_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_001"/>
+        <field name="partner_id" ref="partner_customer_001"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-03-20</field>
         <field name="amount" eval="6000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-014</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-014</field>
     </record>
-    <record id="payment_001_3" model="seven.stars.payment">
-        <field name="order_id" ref="booking_001"/>
+    <record id="payment_001_3" model="account.payment">
+        <field name="ss_order_id" ref="booking_001"/>
+        <field name="partner_id" ref="partner_customer_001"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-05-14</field>
-        <field name="amount" eval="5000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-031</field>
+        <field name="amount" eval="8100.0"/>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-031</field>
     </record>
-    <record id="payment_002_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_002"/>
+    <record id="payment_002_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_002"/>
+        <field name="partner_id" ref="partner_customer_002"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-04-02</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-008</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-008</field>
     </record>
-    <record id="payment_002_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_002"/>
+    <record id="payment_002_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_002"/>
+        <field name="partner_id" ref="partner_customer_002"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-06-11</field>
         <field name="amount" eval="1500.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-036</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-036</field>
     </record>
-    <record id="payment_003_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_003"/>
+    <record id="payment_003_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_003"/>
+        <field name="partner_id" ref="partner_customer_003"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-05-06</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-019</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-019</field>
     </record>
-    <record id="payment_003_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_003"/>
+    <record id="payment_003_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_003"/>
+        <field name="partner_id" ref="partner_customer_003"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-07-02</field>
         <field name="amount" eval="1500.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-048</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-048</field>
     </record>
-    <record id="payment_004_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_004"/>
+    <record id="payment_004_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_004"/>
+        <field name="partner_id" ref="partner_customer_004"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-02-18</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-004</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-004</field>
     </record>
-    <record id="payment_004_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_004"/>
+    <record id="payment_004_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_004"/>
+        <field name="partner_id" ref="partner_customer_004"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-06-25</field>
         <field name="amount" eval="6000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-041</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-041</field>
     </record>
-    <record id="payment_004_3" model="seven.stars.payment">
-        <field name="order_id" ref="booking_004"/>
+    <record id="payment_004_3" model="account.payment">
+        <field name="ss_order_id" ref="booking_004"/>
+        <field name="partner_id" ref="partner_customer_004"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-08-13</field>
-        <field name="amount" eval="5000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-059</field>
+        <field name="amount" eval="7700.0"/>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-059</field>
     </record>
-    <record id="payment_005_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_005"/>
+    <record id="payment_005_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_005"/>
+        <field name="partner_id" ref="partner_customer_005"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-05-30</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-027</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-027</field>
     </record>
-    <record id="payment_005_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_005"/>
+    <record id="payment_005_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_005"/>
+        <field name="partner_id" ref="partner_customer_005"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-09-03</field>
-        <field name="amount" eval="11000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-071</field>
+        <field name="amount" eval="12200.0"/>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-071</field>
     </record>
-    <record id="payment_008_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_008"/>
+    <record id="payment_008_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_008"/>
+        <field name="partner_id" ref="partner_customer_008"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-04-15</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-011</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-011</field>
     </record>
-    <record id="payment_008_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_008"/>
+    <record id="payment_008_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_008"/>
+        <field name="partner_id" ref="partner_customer_008"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-08-01</field>
         <field name="amount" eval="6000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-055</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-055</field>
     </record>
-    <record id="payment_008_3" model="seven.stars.payment">
-        <field name="order_id" ref="booking_008"/>
+    <record id="payment_008_3" model="account.payment">
+        <field name="ss_order_id" ref="booking_008"/>
+        <field name="partner_id" ref="partner_customer_008"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-09-20</field>
-        <field name="amount" eval="5000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-078</field>
+        <field name="amount" eval="8100.0"/>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-078</field>
     </record>
-    <record id="payment_009_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_009"/>
+    <record id="payment_009_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_009"/>
+        <field name="partner_id" ref="partner_customer_009"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-07-14</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-050</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-050</field>
     </record>
-    <record id="payment_010_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_010"/>
+    <record id="payment_010_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_010"/>
+        <field name="partner_id" ref="partner_customer_010"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-07-21</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-052</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-052</field>
     </record>
-    <record id="payment_010_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_010"/>
+    <record id="payment_010_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_010"/>
+        <field name="partner_id" ref="partner_customer_010"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-09-15</field>
-        <field name="amount" eval="800.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-075</field>
+        <field name="amount" eval="1700.0"/>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-075</field>
     </record>
-    <record id="payment_011_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_011"/>
+    <record id="payment_011_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_011"/>
+        <field name="partner_id" ref="partner_customer_011"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-05-05</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-022</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-022</field>
     </record>
-    <record id="payment_012_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_012"/>
+    <record id="payment_012_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_012"/>
+        <field name="partner_id" ref="partner_customer_012"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-06-30</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-045</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-045</field>
     </record>
-    <record id="payment_013_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_013"/>
+    <record id="payment_013_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_013"/>
+        <field name="partner_id" ref="partner_customer_013"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-05-12</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-025</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-025</field>
     </record>
-    <record id="payment_013_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_013"/>
+    <record id="payment_013_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_013"/>
+        <field name="partner_id" ref="partner_customer_013"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-08-20</field>
         <field name="amount" eval="4000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-063</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-063</field>
     </record>
-    <record id="payment_014_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_014"/>
+    <record id="payment_014_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_014"/>
+        <field name="partner_id" ref="partner_customer_014"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-07-07</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-049</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-049</field>
     </record>
-    <record id="payment_015_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_015"/>
+    <record id="payment_015_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_015"/>
+        <field name="partner_id" ref="partner_customer_015"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-08-04</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-061</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-061</field>
     </record>
-    <record id="payment_016_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_016"/>
+    <record id="payment_016_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_016"/>
+        <field name="partner_id" ref="partner_customer_016"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-06-02</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-038</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-038</field>
     </record>
-    <record id="payment_017_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_017"/>
+    <record id="payment_017_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_017"/>
+        <field name="partner_id" ref="partner_customer_017"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-08-18</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-062</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-062</field>
     </record>
-    <record id="payment_018_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_018"/>
+    <record id="payment_018_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_018"/>
+        <field name="partner_id" ref="partner_customer_018"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-07-09</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-051</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-051</field>
     </record>
-    <record id="payment_018_2" model="seven.stars.payment">
-        <field name="order_id" ref="booking_018"/>
+    <record id="payment_018_2" model="account.payment">
+        <field name="ss_order_id" ref="booking_018"/>
+        <field name="partner_id" ref="partner_customer_018"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-09-10</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-073</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-073</field>
     </record>
-    <record id="payment_030_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_030"/>
+    <record id="payment_030_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_030"/>
+        <field name="partner_id" ref="partner_customer_010"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-09-01</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-069</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-069</field>
     </record>
-    <record id="payment_031_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_031"/>
+    <record id="payment_031_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_031"/>
+        <field name="partner_id" ref="partner_customer_011"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-09-08</field>
         <field name="amount" eval="1000.0"/>
-        <field name="method">cash</field>
-        <field name="reference">REC-2026-072</field>
+        <field name="journal_id" ref="journal_cash"/>
+        <field name="memo">REC-2026-072</field>
     </record>
-    <record id="payment_032_1" model="seven.stars.payment">
-        <field name="order_id" ref="booking_032"/>
+    <record id="payment_032_1" model="account.payment">
+        <field name="ss_order_id" ref="booking_032"/>
+        <field name="partner_id" ref="partner_customer_012"/>
+        <field name="partner_type">customer</field>
+        <field name="payment_type">inbound</field>
         <field name="date">2026-09-12</field>
         <field name="amount" eval="3000.0"/>
-        <field name="method">transfer</field>
-        <field name="reference">REC-2026-074</field>
+        <field name="journal_id" model="account.journal" search="[('type', '=', 'bank')]"/>
+        <field name="memo">REC-2026-074</field>
     </record>
+
+    <function model="account.payment" name="action_post" eval="[[ref('payment_001_1'), ref('payment_001_2'), ref('payment_001_3'), ref('payment_002_1'), ref('payment_002_2'), ref('payment_003_1'), ref('payment_003_2'), ref('payment_004_1'), ref('payment_004_2'), ref('payment_004_3'), ref('payment_005_1'), ref('payment_005_2'), ref('payment_008_1'), ref('payment_008_2'), ref('payment_008_3'), ref('payment_009_1'), ref('payment_010_1'), ref('payment_010_2'), ref('payment_011_1'), ref('payment_012_1'), ref('payment_013_1'), ref('payment_013_2'), ref('payment_014_1'), ref('payment_015_1'), ref('payment_016_1'), ref('payment_017_1'), ref('payment_018_1'), ref('payment_018_2'), ref('payment_030_1'), ref('payment_031_1'), ref('payment_032_1')]]"/>
+
+    <function model="sale.order" name="_ss_invoice_booking" eval="[[ref('booking_001'), ref('booking_002'), ref('booking_003'), ref('booking_004'), ref('booking_005'), ref('booking_008'), ref('booking_009'), ref('booking_010'), ref('booking_011'), ref('booking_012'), ref('booking_013'), ref('booking_014'), ref('booking_015'), ref('booking_016'), ref('booking_017'), ref('booking_018'), ref('booking_031'), ref('booking_032')]]"/>
 
 </odoo>

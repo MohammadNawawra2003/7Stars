@@ -35,6 +35,9 @@
                         string="إلغاء الحجز"
                         groups="seven_stars_rental.group_ss_booking_manager"
                         invisible="not is_rental_order or booking_state in ('cancelled', 'completed')"/>
+                <button name="action_ss_print_contracts" type="object"
+                        string="طباعة العقود"
+                        invisible="not is_rental_order or not contract_report_ids"/>
 
                 <!-- The eight PRD states, alongside the standard four. They are independent
                      fields and were verified coexisting at runtime (T4). -->
@@ -43,14 +46,28 @@
                        statusbar_visible="draft,tentative,awaiting,confirmed,ready,completed"/>
             </xpath>
 
-            <!-- This workflow creates no customer invoice (spec §1.2), so the buttons that
-                 would start one are hidden on a rental order and left untouched everywhere
-                 else. Verified T8. -->
+            <!-- Invoicing is AUTOMATIC on «مؤكد» (Jamal, 2026-09-23), so the manual buttons
+                 stay hidden on a rental order: pressing them would raise a second invoice
+                 for a booking that already has one. The invoice is reached through the
+                 standard Invoices smart button. Untouched on every other order. -->
             <xpath expr="//button[@id='create_invoice']" position="attributes">
                 <attribute name="invisible">invoice_status != 'to invoice' or is_rental_order</attribute>
             </xpath>
             <xpath expr="//button[@id='create_invoice_percentage']" position="attributes">
                 <attribute name="invisible">invoice_status != 'no' or state != 'sale' or is_rental_order</attribute>
+            </xpath>
+
+            <!-- The figures staff actually look for, on the form itself rather than a tab —
+                 the shape Jamal asked for on 2026-09-23. -->
+            <xpath expr="//group[@name='order_details']" position="inside">
+                <field name="groom_name" invisible="not is_rental_order or event_type != 'wedding'"/>
+                <field name="bride_name" invisible="not is_rental_order or event_type != 'wedding'"/>
+                <field name="hall_ids" widget="many2many_tags" options="{'no_create': True}"
+                       invisible="not is_rental_order" readonly="state in ('sale', 'cancel')"/>
+                <field name="collected_amount" invisible="not is_rental_order"/>
+                <field name="outstanding_amount" invisible="not is_rental_order"
+                       decoration-danger="outstanding_amount &gt; 0"
+                       decoration-success="outstanding_amount &lt;= 0"/>
             </xpath>
 
             <xpath expr="//notebook/page[@name='order_lines']" position="before">
@@ -59,7 +76,22 @@
                         <group string="المناسبة">
                             <field name="event_type"/>
                             <field name="guest_count"/>
+                            <!-- hall_ids lives on the form header above, where staff look
+                                 for it. Picking one writes its rental line, priced by the
+                                 booking's pricelist. -->
+                            <field name="contract_report_ids" widget="many2many_tags"
+                                   options="{'no_create': True}"/>
                         </group>
+                        <group string="بيانات العميل">
+                            <!-- Stored on the customer; shown here because the contracts
+                                 print them and nobody opens the partner form mid-booking. -->
+                            <field name="partner_street"/>
+                            <field name="partner_whatsapp"/>
+                            <field name="partner_id_number"/>
+                            <field name="partner_responsible_person"/>
+                        </group>
+                    </group>
+                    <group>
                         <group string="ملاحظات داخلية">
                             <field name="internal_note_men" nolabel="1"
                                    placeholder="ملاحظات قاعة الرجال…"/>
@@ -93,12 +125,19 @@
                                    decoration-success="outstanding_amount &lt;= 0"/>
                         </group>
                     </group>
-                    <field name="payment_ids">
-                        <list editable="bottom">
+                    <button name="%(seven_stars_rental.action_ss_payment_register)d"
+                            type="action" string="تسجيل دفعة" class="btn-primary"
+                            icon="fa-money"/>
+                    <!-- Real account.payment records. Read-only here: money is taken through
+                         the wizard, which posts it and settles it against the invoice. -->
+                    <field name="payment_ids" readonly="1">
+                        <list>
                             <field name="date"/>
                             <field name="amount"/>
-                            <field name="method"/>
-                            <field name="reference"/>
+                            <field name="payment_type"/>
+                            <field name="journal_id"/>
+                            <field name="memo"/>
+                            <field name="state"/>
                             <field name="currency_id" column_invisible="True"/>
                         </list>
                     </field>

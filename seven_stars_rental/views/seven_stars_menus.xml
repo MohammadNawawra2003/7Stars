@@ -38,13 +38,13 @@
 
     <record id="action_ss_payments" model="ir.actions.act_window">
         <field name="name">الدفعات</field>
-        <field name="res_model">seven.stars.payment</field>
+        <field name="res_model">account.payment</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_seven_stars_payment_search"/>
+        <field name="domain">[('ss_order_id', '!=', False)]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smart_button">لا توجد دفعات بعد</p>
-            <p>كل مبلغ يصل يُسجَّل هنا وفي مكان واحد فقط. المبالغ المدفوعة والمتبقية على
-               الحجز محسوبة من هذه السطور.</p>
+            <p>كل مبلغ يصل يُسجَّل هنا وفي المحاسبة في آن واحد، ويُسوَّى من فاتورة العقد.
+               المبالغ المدفوعة والمتبقية على الحجز محسوبة من هذه الدفعات.</p>
         </field>
     </record>
 
